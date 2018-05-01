@@ -108,7 +108,62 @@ dir.create(file.path(write_figures_path,"svg"), recursive=TRUE)
 load(file=file.path(write_output_base_path, "reproduc_data.rda"))
 
 
+###########################################################################
+###  Plot keywords by Journal
+###########################################################################
+plot_articles <- reproduc_df %>%
+ 	select(keyword, Q2_abbrev) %>%
+ 	group_by(Q2_abbrev, keyword) %>% 
+ 	summarise(count = n())
 
+plot_articles$keyword <- factor(plot_articles$keyword, levels=c(TRUE, FALSE), labels=c("Keyword", "None"))
+
+### Create a table for labels
+plot_articles_spread <- plot_articles %>% 
+	spread(keyword, count) %>%
+	mutate(Total = Keyword + None)
+#pub_table$labels <- paste0(pub_table$total, " [", pub_table$keyword, " : ", pub_table$none,"]")
+plot_articles_spread$labels <- paste0(plot_articles_spread$Keyword, " : ", plot_articles_spread$None," [", plot_articles_spread$Total, "]")
+#pub_table$labels <- paste0(" [", pub_table$total, "] ", pub_table$keyword, " : ", pub_table$none)
+	
+### Plot black and white
+  p <- ggplot(data = plot_articles, aes(x = Q2_abbrev)) 
+  p <- p + geom_bar(aes(y = count, fill = keyword), stat = 'identity')
+  p <- p + geom_text(data=plot_articles_spread, aes(y = Total + 3, label=labels), vjust=0, size=2.3)
+  p <- p + scale_y_continuous(name="Sampled Articles", expand = c(0, 0), limits=c(0,110), breaks=seq(0,160,20))
+  p <- p + scale_x_discrete(name="Journal")
+  p <- p + scale_fill_manual(name="Keyword", values=c("grey20", "grey70"))
+  p <- p + theme_classic_new(9.5) +   theme(legend.position="bottom")
+  p 
+  
+### Save figure
+ggsave(paste0(file.path(write_figures_path,"png/"), "article_sample_keyword_by_journal", "_bw.png"), p, width=5, height=3, dpi=600)
+ggsave(paste0(file.path(write_figures_path,"svg/"), "article_sample_keyword_by_journal", "_bw.svg"), p, width=5, height=3)
+ggsave(paste0(file.path(write_figures_path,"pdf/"), "article_sample_keyword_by_journal", "_bw.pdf"), p, width=5, height=3)
+
+	
+plot_articles$fill <- paste0(plot_articles$Q2_abbrev, "--", plot_articles$keyword)
+
+journal_colors_black <- rep(journal_colors, each=2)
+journal_colors_black[seq(1, length(journal_colors_black), 2)] <- "grey30"
+journal_colors_black
+
+### Plot as separate bars 
+  p <- ggplot(data = plot_articles, aes(x = Q2_abbrev)) 
+  p <- p + geom_bar(aes(y = count, fill = fill), stat = 'identity')
+  p <- p + geom_text(data=plot_articles_spread, aes(y = Total + 3, label=labels), vjust=0, size=2.3)
+  p <- p + scale_y_continuous(name="Sampled Articles", expand = c(0, 0), limits=c(0,110), breaks=seq(0,160,20))
+  p <- p + scale_x_discrete(name="Journal")
+  p <- p + scale_fill_manual(name="Keyword", values=journal_colors_black)
+  p <- p + theme_classic_new(9.5) +   theme(legend.position="none")
+  p 
+   
+  cvd_grid(p)
+
+### Save figure
+ggsave(paste0(file.path(write_figures_path,"png/"), "article_sample_keyword_by_journal", "_color.png"), p, width=5, height=3, dpi=600)
+ggsave(paste0(file.path(write_figures_path,"svg/"), "article_sample_keyword_by_journal", "_color.svg"), p, width=5, height=3)
+ggsave(paste0(file.path(write_figures_path,"pdf/"), "article_sample_keyword_by_journal", "_color.pdf"), p, width=5, height=3)
 
 ###########################################################################
 ###  Plot by Journal

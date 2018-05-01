@@ -68,6 +68,9 @@ require(colorblindr)
 ### Load these functions for this unique project
 require(stringr)
 
+### Fix the select command
+select <- dplyr::select
+
 ### Load project specific functions
 file.sources = list.files(function_path, pattern="*.R", recursive=TRUE)
 sapply(file.path(function_path, file.sources),source)
@@ -110,6 +113,17 @@ reproduc_df <- read.csv(file = read_location)
 #unnest(`Select Investors`)
 
 ###########################################################################
+###  Fix http in Q3
+###########################################################################
+### Remove doi.org/
+### Remove https://doi.org/
+reproduc_df$Q3 <- str_replace(reproduc_df$Q3, "https://", "")
+reproduc_df$Q3 <- str_replace(reproduc_df$Q3, "doi.org/", "")
+reproduc_df$Q3 <- as.character(reproduc_df$Q3)
+ 
+
+
+###########################################################################
 ###  Drop duplicates
 ###########################################################################
 ### Check for duplicates
@@ -146,6 +160,49 @@ reproduc_df <- reproduc_df %>%
 # Q8 = comments
 # Q9 = Do I think i can do it: yes**, no, not sure**, not familiar with computational**
 
+###########################################################################
+###  Read in publication summary table
+###########################################################################
+pub_summary_table <- read.csv(file.path(write_output_base_path, "articles/pub_summary_table.csv"))
+
+### Add  publication abbreviations to publication summary table
+pub_summary_table$journal_abbrev <- factor(pub_summary_table$journal_abbrev, levels=journal_abbrev)
+
+
+###########################################################################
+###  Add keywords
+###########################################################################
+### Read in Papers
+paper_assign <- read.csv(file.path(write_output_base_path, "articles/paper_assign.csv"))
+sampled_keywords <- read.csv(file.path(write_output_base_path, "articles/sampled_keywords.csv"))
+sampled_nonkeywords <- read.csv(file.path(write_output_base_path, "articles/sampled_nonkeywords.csv"))
+
+head(sampled_nonkeywords)
+
+### Create a column for keyword selection and merge into a single dataframe
+sampled_nonkeywords$keyword <- FALSE
+sampled_keywords$keyword <- TRUE
+sampled_df <- rbind(sampled_nonkeywords, sampled_keywords)
+
+### Join the paper assignments with keyword column based on index
+paper_assign_merge <- paper_assign %>% 
+	left_join(sampled_df, by = c("index" = "x")) %>%
+	select(DOI, keyword)
+
+### Merge back with reproduc_df to add keyword column
+reproduc_df <- reproduc_df %>%
+	left_join(paper_assign_merge, by = c("Q3" = "DOI"))
+	
+
+### Check missing DOIs
+check_df <- reproduc_df %>%
+	full_join(paper_assign_merge, by = c("Q3" = "DOI"))
+
+missing_doi <- paper_assign_merge$DOI[!(paper_assign_merge$DOI %in% reproduc_df$Q3)]
+missing_papers <- paper_assign[paper_assign$DOI %in% missing_doi, ]
+
+### Output to csv
+write.csv(missing_papers, file.path(write_output_base_path, "missing_papers.csv"))
 
 ###########################################################################
 ###  Process Q2 - Journal Abbreviation
@@ -153,7 +210,6 @@ reproduc_df <- reproduc_df %>%
 ### Create a column of journal abbreviations
 journal_names <- levels(reproduc_df$Q2)
 reproduc_df$Q2_abbrev <- factor(reproduc_df$Q2, levels=journal_names, labels=journal_abbrev)
-
 
 ###########################################################################
 ###  Process Q5 - "Availability Claim"

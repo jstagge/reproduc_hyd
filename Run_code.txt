@@ -1,7 +1,3 @@
 Rscript 00_prepare_file_system.R
-Rscript 01_process_streamflows.R
-Rscript 02_mf_model.R
-Rscript 03_pca_tree_ring.R
-Rscript 04_ap_apr_model.R
-Rscript 05_plot_ap_apr_model.R
-Rscript 06_gof.R
+Rscript 01_reproduc_data_handling.R
+Rscript 02_reproduc_figs.R
