@@ -1,8 +1,10 @@
-# Project Title
+# Reproducibility in Hydrology
 
-One Paragraph of project description goes here
+Code associated with paper, entitled, '??????'. One Paragraph of project description goes here
 
 ## Getting Started
+
+How to clone repository, download data
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
 
@@ -33,6 +35,10 @@ until finished
 End with an example of getting some data out of the system or using it for a little demo
 
 ## Running the tests
+
+Can run each piece of code separately.
+
+Or can use the Run_code.txt file to process all at once.
 
 Explain how to run the automated tests for this system
 
