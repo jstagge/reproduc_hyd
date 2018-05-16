@@ -410,7 +410,7 @@ ggplot(reproduc_df, aes(x=Q9)) + geom_bar()
 ###########################################################################
 ###  Save progress
 ###########################################################################
-save(reproduc_df, q6_labels, q6_journal_perc, q6_journal_count, q7_journal_perc, q7_journal_count, q9_labels, file=file.path(write_output_base_path, "reproduc_data.rda"))
+save(reproduc_df, pub_summary_table, q6_labels, q6_journal_perc, q6_journal_count, q7_journal_perc, q7_journal_count, q9_labels, file=file.path(write_output_base_path, "reproduc_data.rda"))
 
 
 
