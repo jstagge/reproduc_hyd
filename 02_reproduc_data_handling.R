@@ -102,7 +102,7 @@ dir.create(file.path(write_figures_path,"svg"), recursive=TRUE)
 ###########################################################################
 
 ### Read in reproducibility data
-read_location <- file.path(data_path, "Reproducibility survey_April18_final.csv")
+read_location <- file.path(data_path, "Reproducibility_Results_edits.csv")
 
 reproduc_df <- read.csv(file = read_location)
 
@@ -121,44 +121,6 @@ reproduc_df$Q3 <- str_replace(reproduc_df$Q3, "https://", "")
 reproduc_df$Q3 <- str_replace(reproduc_df$Q3, "doi.org/", "")
 reproduc_df$Q3 <- as.character(reproduc_df$Q3)
  
-
-
-###########################################################################
-###  Drop duplicates
-###########################################################################
-### Check for duplicates
-duplicate_df <- reproduc_df %>% 
-	group_by(Q3) %>% 
-	filter(n()>1) %>% 
-	summarize(n=n(), Reviewer=Q1[1], Title=Q4[1]) %>%
-	arrange(Reviewer, Q3)
-
-duplicate_df <- data.frame(duplicate_df)
-
-### Output to csv
-write.csv(duplicate_df, file.path(write_output_base_path, "duplicates_by_number.csv"))
-
-duplicate_full <- reproduc_df[reproduc_df$Q3 %in% duplicate_df$Q3,] %>%
-	arrange(Q3)
-
-### Output to csv
-write.csv(duplicate_full, file.path(write_output_base_path, "duplicates_full.csv"))
-
-
-### Remove duplicates based on DOI (Q3)
-reproduc_df <- reproduc_df %>% 
-  	distinct("Q3") %>%
-  	arrange(Q2, Q1, Q3)
-
-
-# Q2 = journal
-# Q3 = doi
-# Q4 = citation
-# Q5 = Some or all available?*** Data-less? Not specified?
-# Q6 = Author request, third party, available only in article, Some or all found online*** [[[Comma separated column, can be multiples]]]
-# Q7 = ***Directions to run, Code/Model/Software, Input Data,      Hardware/Software requirements, File format, instructions to open [[[Comma separated column]]]
-# Q8 = comments
-# Q9 = Do I think i can do it: yes**, no, not sure**, not familiar with computational**
 
 ###########################################################################
 ###  Read in publication summary table
@@ -189,11 +151,17 @@ paper_assign_merge <- paper_assign %>%
 	left_join(sampled_df, by = c("index" = "x")) %>%
 	select(DOI, keyword)
 
+### Check and remove duplicate DOIs
+dup_doi <- duplicated(paper_assign_merge$DOI)
+paper_assign_merge <- paper_assign_merge[!dup_doi,]
+sum(dup_doi)
+### There is one paper (Isakov) that was sampled twice
+rm(dup_doi)
+
 ### Merge back with reproduc_df to add keyword column
 reproduc_df <- reproduc_df %>%
 	left_join(paper_assign_merge, by = c("Q3" = "DOI"))
 	
-
 ### Check missing DOIs
 check_df <- reproduc_df %>%
 	full_join(paper_assign_merge, by = c("Q3" = "DOI"))
@@ -203,6 +171,79 @@ missing_papers <- paper_assign[paper_assign$DOI %in% missing_doi, ]
 
 ### Output to csv
 write.csv(missing_papers, file.path(write_output_base_path, "missing_papers.csv"))
+
+
+###########################################################################
+###  Separate into availability only and reproducibility 
+###########################################################################
+### Create test based on manually created reproducibility/availability column
+reproduc_test <- reproduc_df$rep_avail == "repro"
+
+### Separate reproduc from availability only 
+reproduc_only <- reproduc_df[reproduc_test,]
+avail_only <- reproduc_df[!reproduc_test,]
+
+dim(reproduc_only)
+dim(avail_only)
+
+###########################################################################
+###  Check for duplicates
+###########################################################################
+duplicate_avail <- avail_only %>% 
+	group_by(Q3) %>% 
+	filter(n()>1) %>% 
+	summarize(n=n(), Reviewer=Q1[1], Title=Q4[1]) %>%
+	arrange(Reviewer, Q3) %>%
+	as.data.frame
+	
+duplicate_reproduc <- reproduc_only %>% 
+	group_by(Q3) %>% 
+	filter(n()>1) %>% 
+	summarize(n=n(), Reviewer=Q1[1], Title=Q4[1]) %>%
+	arrange(Reviewer, Q3) %>%
+	as.data.frame
+
+### Combine into one	
+duplicate_df <- rbind(duplicate_avail, duplicate_reproduc)
+
+### Output to csv
+write.csv(duplicate_df, file.path(write_output_base_path, "duplicates_by_number.csv"))
+
+### Remove individual dataframes
+rm(duplicate_avail)
+rm(duplicate_reproduc)
+
+duplicate_full <- reproduc_df[reproduc_df$Q3 %in% duplicate_df$Q3,] %>%
+	arrange(Q3)
+
+### Output to csv
+write.csv(duplicate_full, file.path(write_output_base_path, "duplicates_full.csv"))
+
+
+###########################################################################
+###  Bring reproducibility and availability back together
+###########################################################################
+reproduc_df <- rbind(avail_only, reproduc_only)
+
+### Remove individual dataframes
+rm(avail_only, reproduc_only)
+
+###########################################################################
+###  Note to self regarding questions
+###########################################################################
+# Q2 = journal
+# Q3 = doi
+# Q4 = citation
+# Q5 = Some or all available?*** Data-less? Not specified?
+# Q6 = Author request, third party, available only in article, Some or all found online*** [[[Comma separated column, can be multiples]]]
+# Q7 = ***Directions to run, Code/Model/Software, Input Data,      Hardware/Software requirements, File format, instructions to open [[[Comma separated column]]]
+# Q8 = comments
+# Q9 = Do I think i can do it: yes**, no, not sure**, not familiar with computational**
+# Q10 = Do I continue with reproducibility analysis?
+# Q11 = Can results be reproduced?
+# Q12 = How long did it take?
+# Q13 = Why did reproducibility fail?
+
 
 ###########################################################################
 ###  Process Q2 - Journal Abbreviation
@@ -218,15 +259,14 @@ reproduc_df$Q2_abbrev <- factor(reproduc_df$Q2, levels=journal_names, labels=jou
 q5_levels <- levels(reproduc_df$Q5)
 reproduc_df$Q5 <- factor(reproduc_df$Q5, levels=q5_levels, labels=c("Dataless or review", "No availability", "Some or all available"))
 
-
 ###########################################################################
 ###  Process Q6 - "Availability Source"
 ###########################################################################
 q6_labels <- c("Some or All\nAvailable Online", "Only In\nArticle", "Author\nRequest", "Third\nParty", "None")
 
-### Create columns for each of the sources (allow duplicates) 
+### Create columns for each of the sources
 q6_df <- reproduc_df %>% 
-	dplyr::select(Q2_abbrev, Q3, Q6) %>%
+	dplyr::select(Q2_abbrev, Q3, Q6, rep_avail) %>%
 	mutate(some = str_detect(Q6, "online"))  %>%
 	mutate(article = str_detect(Q6, "figures/tables/text")) %>%
 	mutate(author = str_detect(Q6, "Author")) %>%
@@ -234,12 +274,14 @@ q6_df <- reproduc_df %>%
 
 ### Create a column for none
 q6_df$none <- q6_df %>% 
-	dplyr::select(-Q2_abbrev, -Q3, -Q6) %>%
+	dplyr::select(-Q2_abbrev, -Q3, -Q6, -rep_avail) %>%
 	apply(., 1, sum) == 0
 
-### Summarize, count number of each, grouped per journal
+### Summarize, count number of each, grouped per journal, perform only for availability test
+### Only consider the first pass (availability or reproducibility step)
 q6_journal_count <- q6_df %>%
-	dplyr::select(-Q6, -Q3) %>%
+	filter(rep_avail != "repro") %>%
+	select(-Q6, -Q3) %>%
 	group_by(Q2_abbrev) %>%
   	summarize(author = sum(author), article = sum(article), third = sum(third), some = sum(some), none = sum(none), n= n()) %>%
   	ungroup()
@@ -299,7 +341,7 @@ reproduc_df$Q6_grouping <- factor(reproduc_df$Q6_grouping, levels=q6_labels)
 #Materials linked by unique and persistent identifiers
 #Metadata to describe the code
 #Common file format /instructions to open
-q7_df <- data.frame(Q3=reproduc_df$Q3, Q7=reproduc_df$Q7)
+q7_df  <- data.frame(Q3=reproduc_df$Q3, Q7=reproduc_df$Q7)
 
 ### Test for each of the primary answers
 q7_df$dir <- str_detect(reproduc_df$Q7, "Directions to run")
@@ -332,34 +374,28 @@ q7_df$secondary_all <- q7_df$secondary_n == 4
 ### Test for all
 q7_df$all <- q7_df$primary == TRUE & q7_df$secondary_all == TRUE 
 
-
-### Test plot
-q7_melt <- q7_df %>%
-	dplyr::select(-Q3, -Q7, -primary_n, -secondary_n) %>%
-	gather()
-	
-ggplot(q7_melt, aes(x=key, fill=value)) + geom_bar()	
+### Check that the DOIs in q7_df match original DOIs
+assert_that(sum(q7_df$Q3 != reproduc_df$Q3) == 0)
 
 ### Merge back into reproduc_df
-sum(q7_df$Q3 != reproduc_df$Q3)
-
 q7_df <- q7_df %>% dplyr::select(-Q7, -Q3)
 names(q7_df) <- paste0("Q7_", names(q7_df))
-
-#names(q7_df)[1] <- "Q3"
-#reproduc_df <- left_join(reproduc_df, q7_df, by="Q3")
-
 reproduc_df <- cbind(reproduc_df, q7_df)
 
 
-
-
+### Run analysis on q7
 q7_df$Q2_abbrev <- reproduc_df$Q2_abbrev
+q7_df$rep_avail <- reproduc_df$rep_avail
 
 ### Summarize, count number of each, grouped per journal
+### Only consider the first pass (availability or reproducibility step)
 q7_journal_count <- q7_df %>%
-	dplyr::select(-Q7_primary_n, -Q7_primary, -Q7_secondary_n, -Q7_secondary_some, -Q7_secondary_all, -Q7_all) %>%
+	### Only the availability portion of survey
+	filter(rep_avail != "repro") %>%
+	select(-Q7_primary_n, -Q7_primary, -Q7_secondary_n, -Q7_secondary_some, -Q7_secondary_all, -Q7_all) %>%
+	### Group by journal
 	group_by(Q2_abbrev) %>%
+	### Count number of TRUEs in each category
   	summarize(dir = sum(Q7_dir), code = sum(Q7_code), data = sum(Q7_data), hardw = sum(Q7_hardw), doi = sum(Q7_doi), meta = sum(Q7_meta), common = sum(Q7_common), n= n()) %>%
   	ungroup()
 
@@ -403,19 +439,116 @@ q9_reframe <- factor(q9_reframe, levels=q9_levels, labels=q9_labels)
 reproduc_df$Q9 <- q9_reframe
 
 ### Check plot
-ggplot(reproduc_df, aes(x=Q9)) + geom_bar()
+ggplot(subset(reproduc_df, rep_avail != "repro"), aes(x=Q9)) + geom_bar()
 
 
+###########################################################################
+###  Process Q11 - "Replicability Determination"
+###########################################################################
+### Separate Q11    
+q11_reframe <- as.character(reproduc_df$Q11)
 
+### Convert Emptys to Avail Failure
+q11_reframe[q11_reframe == ""] <- "Avail Fail"
+
+### Create labels and levels
+q11_labels <- c("Yes", "Some", "No", "Availability\nFail")
+q11_levels <- unique(q11_reframe)
+q11_levels <- q11_levels[c(4,3,2,1)]
+q11_labels
+q11_levels
+
+q11_reframe <- factor(q11_reframe, levels=q11_levels, labels=q11_labels)
+
+### Factor q11
+reproduc_df$Q11 <- q11_reframe
+
+### Check plot
+ggplot(subset(reproduc_df, rep_avail == "repro"), aes(x=Q11)) + geom_bar()
+
+
+###########################################################################
+###  Process Q13 - "Reproducibility Failure"
+###########################################################################
+q13_labels <- c("Unclear directions", "Results differed", "Did not generate results", "Hardware/software error", "Other", "None")
+
+### Create columns for each of the sources
+q13_df <- reproduc_df %>% 
+	select(Q2_abbrev, Q3, Q13, rep_avail) %>%
+	mutate(unclear = str_detect(Q13, "directions"))  %>%
+	mutate(differ = str_detect(Q13, "differed")) %>%
+	mutate(no_result = str_detect(Q13, "generate")) %>%
+	mutate(hard_soft = str_detect(Q13, "error")) %>%
+	mutate(other = str_detect(Q13, "Other"))
+
+### Create a column for none
+q13_df$none <- q13_df %>% 
+	select(-Q2_abbrev, -Q3, -Q13, -rep_avail) %>%
+	apply(., 1, sum) == 0
+
+### Merge back into reproduc_df
+q13_df <- q13_df %>% dplyr::select(-Q2_abbrev, -Q3, -Q13, rep_avail)
+names(q13_df) <- paste0("Q13_", names(q13_df))
+reproduc_df <- cbind(reproduc_df, q13_df)
+
+
+### Run analysis on q7
+q13_df$Q2_abbrev <- reproduc_df$Q2_abbrev
+q13_df$rep_avail <- reproduc_df$rep_avail
+q13_df$Q11 <- reproduc_df$Q11
+
+q13_df$avail_fail <- FALSE
+q13_df$avail_fail[q13_df$Q11 == "Availability\nFail"] <- TRUE
+q13_df$none_corrected <- q13_df$Q13_none
+q13_df$none_corrected[q13_df$Q11 == "Availability\nFail"] <- FALSE
+
+### Summarize, count number of each, grouped per journal
+### Only consider the first pass (availability or reproducibility step)
+q13_journal_count <- q13_df %>%
+	### Only the availability portion of survey
+	filter(rep_avail == "repro") %>%
+	#select(-Q7_primary_n, -Q7_primary, -Q7_secondary_n, -Q7_secondary_some, -Q7_secondary_all, -Q7_all) %>%
+	### Group by journal
+	group_by(Q2_abbrev) %>%
+	### Count number of TRUEs in each category
+  	summarize(unclear = sum(Q13_unclear), differ = sum(Q13_differ), no_result = sum(Q13_no_result), hard_soft = sum(Q13_hard_soft), other = sum(Q13_other), none= sum(none_corrected), avail_fail = sum(avail_fail), n= n()) %>%
+  	ungroup()
+
+### Add a total row at the bottom
+q13_journal_count <- q13_journal_count %>% 
+  		dplyr::select(-Q2_abbrev) %>% 
+  		summarise_all(funs(sum)) %>%
+  		add_column(Q2_abbrev="Total", .before=1) %>%
+  		rbind(q13_journal_count, .)	
+
+### Divide by n to get percent in each category  	
+q13_journal_perc  <- q13_journal_count %>%
+  	mutate(unclear= unclear/n, differ = differ/n, no_result = no_result/n, hard_soft = hard_soft/n, other = other/n, none = none/n, avail_fail = avail_fail/n) %>%
+  	dplyr::select(-n)
+  	
 ###########################################################################
 ###  Save progress
 ###########################################################################
-save(reproduc_df, pub_summary_table, q6_labels, q6_journal_perc, q6_journal_count, q7_journal_perc, q7_journal_count, q9_labels, file=file.path(write_output_base_path, "reproduc_data.rda"))
+save(reproduc_df, pub_summary_table, q6_labels, q6_journal_perc, q6_journal_count, q7_journal_perc, q7_journal_count, q9_labels, q11_labels, q13_labels, q13_journal_count, q13_journal_perc, file=file.path(write_output_base_path, "reproduc_data.rda"))
 
 
 
 
 
+yup <- q13_df %>%
+	filter(rep_avail == "repro") %>%
+	select(-Q2_abbrev, -Q3, -Q13, -rep_avail) %>%
+	gather() %>%
+	filter(value == TRUE)
+	
+ggplot(yup, aes(x=key)) + geom_bar()
+
+
+yup <- reproduc_df %>%
+	filter(rep_avail == "repro") %>%
+	select(Q2_abbrev, Q3, Q11, Q13, rep_avail) 
+	
+	
 
 
  

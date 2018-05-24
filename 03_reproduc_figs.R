@@ -90,6 +90,7 @@ sapply(file.path(global_path, file.sources),source)
 
 journal_abbrev <- c("EM&S", "HESS", "JoH", "JAWRA", "JWRP&M", "WRR")
 journal_colors <- cb_pal("custom", n=6, sort=FALSE)
+journal_colors <- journal_colors[c(1, 2, 4, 3, 5, 6)]
 
 ###########################################################################
 ## Set Additional Output Folders
@@ -108,28 +109,39 @@ dir.create(file.path(write_figures_path,"svg"), recursive=TRUE)
 load(file=file.path(write_output_base_path, "reproduc_data.rda"))
 
 
+
+###########################################################################
+## Create column with availability / reproducibility testing
+###########################################################################
+reproduc_df <- reproduc_df %>%
+	mutate(rep_avail_clean = case_when(
+		rep_avail == "repro" ~ "repro",
+		TRUE ~ "avail")
+	)
+                           
 ###########################################################################
 ###  Plot keywords by Journal
 ###########################################################################
-plot_articles <- reproduc_df %>%
+plot_articles_sample <- reproduc_df %>%
+	filter(rep_avail_clean == "avail") %>%
  	select(keyword, Q2_abbrev) %>%
  	group_by(Q2_abbrev, keyword) %>% 
  	summarise(count = n())
 
-plot_articles$keyword <- factor(plot_articles$keyword, levels=c(TRUE, FALSE), labels=c("Keyword", "None"))
+plot_articles_sample$keyword <- factor(plot_articles_sample$keyword, levels=c(TRUE, FALSE), labels=c("Keyword", "None"))
 
 ### Create a table for labels
-plot_articles_spread <- plot_articles %>% 
+plot_articles_sample_spread <- plot_articles_sample %>% 
 	spread(keyword, count) %>%
 	mutate(Total = Keyword + None)
 #pub_table$labels <- paste0(pub_table$total, " [", pub_table$keyword, " : ", pub_table$none,"]")
-plot_articles_spread$labels <- paste0(plot_articles_spread$Keyword, " : ", plot_articles_spread$None," [", plot_articles_spread$Total, "]")
+plot_articles_sample_spread$labels <- paste0(plot_articles_sample_spread$Keyword, " : ", plot_articles_sample_spread$None," [", plot_articles_sample_spread$Total, "]")
 #pub_table$labels <- paste0(" [", pub_table$total, "] ", pub_table$keyword, " : ", pub_table$none)
 	
 ### Plot black and white
-  p <- ggplot(data = plot_articles, aes(x = Q2_abbrev)) 
+  p <- ggplot(data = plot_articles_sample, aes(x = Q2_abbrev)) 
   p <- p + geom_bar(aes(y = count, fill = keyword), stat = 'identity')
-  p <- p + geom_text(data=plot_articles_spread, aes(y = Total + 3, label=labels), vjust=0, size=2.3)
+  p <- p + geom_text(data=plot_articles_sample_spread, aes(y = Total + 3, label=labels), vjust=0, size=2.3)
   p <- p + scale_y_continuous(name="Sampled Articles", expand = c(0, 0), limits=c(0,110), breaks=seq(0,160,20))
   p <- p + scale_x_discrete(name="Journal")
   p <- p + scale_fill_manual(name="Keyword", values=c("grey20", "grey70"))
@@ -142,16 +154,16 @@ ggsave(paste0(file.path(write_figures_path,"svg/"), "article_sample_keyword_by_j
 ggsave(paste0(file.path(write_figures_path,"pdf/"), "article_sample_keyword_by_journal", "_bw.pdf"), p, width=5, height=3)
 
 	
-plot_articles$fill <- paste0(plot_articles$Q2_abbrev, "--", plot_articles$keyword)
+plot_articles_sample$fill <- paste0(plot_articles_sample$Q2_abbrev, "--", plot_articles_sample$keyword)
 
 journal_colors_black <- rep(journal_colors, each=2)
 journal_colors_black[seq(1, length(journal_colors_black), 2)] <- "grey30"
 journal_colors_black
 
 ### Plot as separate bars 
-  p <- ggplot(data = plot_articles, aes(x = Q2_abbrev)) 
+  p <- ggplot(data = plot_articles_sample, aes(x = Q2_abbrev)) 
   p <- p + geom_bar(aes(y = count, fill = fill), stat = 'identity')
-  p <- p + geom_text(data=plot_articles_spread, aes(y = Total + 3, label=labels), vjust=0, size=2.3)
+  p <- p + geom_text(data=plot_articles_sample_spread, aes(y = Total + 3, label=labels), vjust=0, size=2.3)
   p <- p + scale_y_continuous(name="Sampled Articles", expand = c(0, 0), limits=c(0,110), breaks=seq(0,160,20))
   p <- p + scale_x_discrete(name="Journal")
   p <- p + scale_fill_manual(name="Keyword", values=journal_colors_black)
@@ -165,11 +177,153 @@ ggsave(paste0(file.path(write_figures_path,"png/"), "article_sample_keyword_by_j
 ggsave(paste0(file.path(write_figures_path,"svg/"), "article_sample_keyword_by_journal", "_color.svg"), p, width=5, height=3)
 ggsave(paste0(file.path(write_figures_path,"pdf/"), "article_sample_keyword_by_journal", "_color.pdf"), p, width=5, height=3)
 
+
 ###########################################################################
-###  Plot by Journal
+## Plot population papers by keyword
+###########################################################################
+pub_summary_table$keyword_prop <- pub_summary_table$keyword / pub_summary_table$total
+#pub_table$labels <- paste0(pub_table$total, " [", pub_table$keyword, " : ", pub_table$none,"]")
+pub_summary_table$labels <- paste0(pub_summary_table$keyword, " : ", pub_summary_table$none," [", pub_summary_table$total, "]")
+#pub_table$labels <- paste0(" [", pub_table$total, "] ", pub_table$keyword, " : ", pub_table$none)
+
+plot_articles_population <- pub_summary_table %>%
+ 	select(-journal, -X, -total, -labels, -keyword_prop) %>%
+ 	gather(keyword, count, -journal_abbrev)
+
+plot_articles_population$keyword[plot_articles_population$keyword == "keyword"] <- "Keyword"
+plot_articles_population$keyword[plot_articles_population$keyword == "none"] <- "None"
+
+
+### Plot black and white
+  p <- ggplot(data = plot_articles_population, aes(x = journal_abbrev)) 
+  p <- p + geom_bar(aes(y = count, fill = keyword), stat = 'identity')
+  p <- p + geom_text(data=pub_summary_table, aes(y = total + 10, label=labels), vjust=0, size=2.3)
+  p <- p + scale_y_continuous(name="Articles in 2017", expand = c(0, 0), limits=c(0,720), breaks=seq(0,800,200))
+  p <- p + scale_x_discrete(name="Journal")
+  p <- p + scale_fill_manual(name="Keyword", values=c("grey20", "grey70"))
+  p <- p + theme_classic_new(9.5) +   theme(legend.position="bottom")
+  p 
+  
+### Save figure
+ggsave(paste0(file.path(write_figures_path,"png/"), "article_keyword_by_journal", "_bw.png"), p, width=5, height=3, dpi=600)
+ggsave(paste0(file.path(write_figures_path,"svg/"), "article_keyword_by_journal", "_bw.svg"), p, width=5, height=3)
+ggsave(paste0(file.path(write_figures_path,"pdf/"), "article_keyword_by_journal", "_bw.pdf"), p, width=5, height=3)
+
+
+plot_articles_population$fill <- paste0(plot_articles_population$journal_abbrev, "--", plot_articles_population$keyword)
+
+journal_colors <- cb_pal("custom", n=6, sort=FALSE)
+journal_colors <- journal_colors[c(1, 2, 4, 3, 5, 6)]
+
+journal_colors_black <- rep(journal_colors, each=2)
+journal_colors_black[seq(1, length(journal_colors_black), 2)] <- "grey30"
+journal_colors_black
+
+### Plot using same colors
+  p <- ggplot(data = plot_articles_population, aes(x = journal_abbrev)) 
+  p <- p + geom_bar(aes(y = count, fill = fill), stat = 'identity')
+  p <- p + geom_text(data=pub_summary_table, aes(y = total + 10, label=labels), vjust=0, size=2.3)
+  p <- p + scale_y_continuous(name="Articles in 2017", expand = c(0, 0), limits=c(0,720), breaks=seq(0,800,200))
+  p <- p + scale_x_discrete(name="Journal")
+  p <- p + scale_fill_manual(name="Keyword", values=journal_colors_black)
+  p <- p + theme_classic_new(9.5) +   theme(legend.position="none")
+  p 
+
+  cvd_grid(p)
+
+### Save figure
+ggsave(paste0(file.path(write_figures_path,"png/"), "article_keyword_by_journal", "_color.png"), p, width=5, height=3, dpi=600)
+ggsave(paste0(file.path(write_figures_path,"svg/"), "article_keyword_by_journal", "_color.svg"), p, width=5, height=3)
+ggsave(paste0(file.path(write_figures_path,"pdf/"), "article_keyword_by_journal", "_color.pdf"), p, width=5, height=3)
+
+
+###########################################################################
+###  Create combined figure
+###########################################################################
+### Merge tables
+plot_articles_join <- plot_articles_sample %>% 
+	full_join(plot_articles_population, by= c("Q2_abbrev" = "journal_abbrev", "keyword" = "keyword")) %>%
+	select(-fill.x, -fill.y) %>%
+	as.data.frame()
+### Rename columns
+names(plot_articles_join) <- c("journal_abbrev", "keyword", "sample", "population")	
+plot_articles_join
+
+### Create a total column for plotting that sums non-keyword and keyword for stacking
+plot_articles_join_total <- plot_articles_join %>% 
+ 	group_by(journal_abbrev) %>% 
+ 	summarise(sample = sum(sample), population = sum(population)) %>%
+ 	add_column( keyword = "Total", .after="journal_abbrev") %>%
+ 	as.data.frame()
+
+plot_articles_join <- rbind(plot_articles_join, plot_articles_join_total)
+
+### Make vertical table
+yup <- plot_articles_join %>% 	
+	gather(source, count, -journal_abbrev, -keyword)
+
+ggplot(yup, aes(x=journal_abbrev, y=count, group=source, fill=keyword)) + geom_bar(stat = "identity",  position = "dodge")
+
+to_plot <- subset(yup, keyword!="None")
+to_plot$fill <- paste0(to_plot$journal_abbrev, "_", to_plot$source, "_", to_plot$keyword)
+to_plot
+
+journal_colors_light<- c("#88EE99","#9AFFFF","#AADDFF","#FFB3C4","#F3F385","#FF99DD")
+
+journal_colors_black <- rep(journal_colors, each=4)
+journal_colors_black[seq(1, length(journal_colors_black), 4)] <- "grey20"
+journal_colors_black[seq(3, length(journal_colors_black), 4)] <- "grey20"
+journal_colors_black[seq(4, length(journal_colors_black), 4)] <- journal_colors_light
+journal_colors_black
+
+  p <- ggplot(to_plot, aes(x=journal_abbrev, y=count, group=source, fill=fill)) 
+  p <- p + geom_bar(data=subset(to_plot, keyword == "Total"), stat = "identity",  position = "dodge", colour="black", size=0.2)
+    p <- p + geom_bar(data=subset(to_plot, keyword == "Keyword"), stat = "identity",  position = "dodge")
+#  p <- p + geom_text(data=pub_summary_table, aes(y = total + 10, label=labels), vjust=0, size=2.3)
+  p <- p + scale_y_continuous(name="Articles", expand = c(0, 0), limits=c(0,720), breaks=seq(0,800,100))
+  p <- p + scale_x_discrete(name="Journal")
+  #p <- p + scale_fill_manual(name="Keyword", values=journal_colors_black)
+  p <- p + scale_fill_manual(name="Keyword", values=journal_colors_black)
+  p <- p + theme_classic_new(9.5) +   theme(legend.position="none")
+  p 
+
+### Save figure
+ggsave(paste0(file.path(write_figures_path,"png/"), "article_keyword_by_journal_combined", "_color.png"), p, width=5.5, height=3.5, dpi=600)
+ggsave(paste0(file.path(write_figures_path,"svg/"), "article_keyword_by_journal_combined", "_color.svg"), p, width=5.5, height=3.5)
+ggsave(paste0(file.path(write_figures_path,"pdf/"), "article_keyword_by_journal_combined", "_color.pdf"), p, width=5.5, height=3.5)
+
+cvd_grid(p)
+
+
+
+journal_colors_black <- rep("grey60", each=4*6)
+journal_colors_black[seq(1, length(journal_colors_black), 4)] <- "grey20"
+journal_colors_black[seq(3, length(journal_colors_black), 4)] <- "grey20"
+journal_colors_black[seq(4, length(journal_colors_black), 4)] <- "grey85"
+journal_colors_black
+
+  p <- ggplot(to_plot, aes(x=journal_abbrev, y=count, group=source, fill=fill)) 
+  p <- p + geom_bar(data=subset(to_plot, keyword == "Total"), stat = "identity",  position = "dodge", colour="black", size=0.2)
+    p <- p + geom_bar(data=subset(to_plot, keyword == "Keyword"), stat = "identity",  position = "dodge", colour="black", size=0.1)
+#  p <- p + geom_text(data=pub_summary_table, aes(y = total + 10, label=labels), vjust=0, size=2.3)
+  p <- p + scale_y_continuous(name="Articles", expand = c(0, 0), limits=c(0,720), breaks=seq(0,800,100))
+  p <- p + scale_x_discrete(name="Journal")
+  #p <- p + scale_fill_manual(name="Keyword", values=journal_colors_black)
+  p <- p + scale_fill_manual(name="Keyword", values=journal_colors_black)
+  p <- p + theme_classic_new(9.5) +   theme(legend.position="none")
+  p 
+
+### Save figure
+ggsave(paste0(file.path(write_figures_path,"png/"), "article_keyword_by_journal_combined", "_bw.png"), p, width=5.5, height=3.5, dpi=600)
+ggsave(paste0(file.path(write_figures_path,"svg/"), "article_keyword_by_journal_combined", "_bw.svg"), p, width=5.5, height=3.5)
+ggsave(paste0(file.path(write_figures_path,"pdf/"), "article_keyword_by_journal_combined", "_bw.pdf"), p, width=5.5, height=3.5)
+
+###########################################################################
+###  Plot Availability claim
 ###########################################################################
 
 avail_journal <- reproduc_df %>% 
+	filter(rep_avail_clean == "avail") %>%
 	dplyr::select(Q2_abbrev, Q5) %>%
 	count(Q2_abbrev, Q5) %>%  
 	mutate(prop_all = prop.table(n)) %>%
@@ -398,7 +552,115 @@ ggsave(paste0(file.path(write_figures_path,"pdf/"), "avail_elements_all_color", 
 
 
 
+###########################################################################
+###  Plot Reproducibility (Q11)
+###########################################################################
+## q11_labels
 
+plot_q11 <- reproduc_df%>%
+  	 filter(rep_avail_clean =="repro") %>%
+	select(Q11) %>%
+	count(Q11) %>%  
+	mutate(prop_all = prop.table(n)) %>%
+	mutate(prop_by_journal = n/sum(n)) %>% 
+	as.data.frame()
+
+### Reorder the levels for question Q5
+plot_q11$Q11 <- factor(plot_q11$Q11, levels=rev(q11_labels))
+#plot_q11$Q5_leading <- factor(plot_q11$Q5, levels=levels(plot_q11$Q5)[c(3,2,1)])
+
+repro_colors <- cb_pal("ptol", n=4, sort=FALSE)
+repro_colors <- repro_colors[c(1,4,3,2)]
+#repro_colors
+ 
+ 
+### Plot as separate bars  
+  p <- ggplot(data = plot_q11, aes(x = Q11, y = n, fill = Q11)) 
+  p <- p + geom_bar(stat = 'identity', width=0.8, position = position_dodge(width=0.8))
+  p <- p + scale_y_continuous(name="Number of Articles", expand = c(0, 0), limits = c(0, 11), breaks=seq(0,20,2))
+  p <- p + scale_x_discrete(name="Reproducibility Determination")
+  p <- p + scale_fill_manual(name="Reproducibility Determination", values=repro_colors)#, limits=levels(avail_journal$Q5_leading)) 
+  p <- p + theme_classic_new(9.5) +   theme(legend.position="none")
+  p 
+  
+### Save figure
+ggsave(paste0(file.path(write_figures_path,"png/"), "repro_determ_color", ".png"), p, width=5.5, height=3, dpi=600)
+ggsave(paste0(file.path(write_figures_path,"svg/"), "repro_determ_color", ".svg"), p, width=5.5, height=3)
+ggsave(paste0(file.path(write_figures_path,"pdf/"), "repro_determ_color", ".pdf"), p, width=5.5, height=3)
+
+ ### Plot as separate bars  
+  p <- ggplot(data = plot_q11, aes(x = Q11, y = prop_all, fill = Q11)) 
+  p <- p + geom_bar(stat = 'identity', width=0.8, position = position_dodge(width=0.8))
+  p <- p + scale_y_continuous(name="Number of Articles", labels = scales::percent, expand = c(0, 0), limits = c(0, 0.55))
+  p <- p + scale_x_discrete(name="Reproducibility Determination")
+  p <- p + scale_fill_manual(name="Reproducibility Determination", values=repro_colors)#, limits=levels(avail_journal$Q5_leading)) 
+  p <- p + theme_classic_new(9.5) +   theme(legend.position="none")
+  p 
+   
+  
+  cvd_grid(p)
+  
+### Save figure
+ggsave(paste0(file.path(write_figures_path,"png/"), "repro_determ_perc_color", ".png"), p, width=5.5, height=3, dpi=600)
+ggsave(paste0(file.path(write_figures_path,"svg/"), "repro_determ_perc_color", ".svg"), p, width=5.5, height=3)
+ggsave(paste0(file.path(write_figures_path,"pdf/"), "repro_determ_perc_color", ".pdf"), p, width=5.5, height=3)
+
+
+###########################################################################
+###  Plot Reproducibility Failure (Q13)
+###########################################################################
+#sSor for plotting
+plot_q13 <- q13_journal_perc%>%
+  	 gather(key=source, value=value, -Q2_abbrev) %>%
+  	 filter(Q2_abbrev !="Total")
+
+plot_q13 <- q13_journal_count%>%
+  	 gather(key=failure, value=value, -Q2_abbrev) %>%
+  	 filter(Q2_abbrev =="Total") %>%
+  	 ### remove total n
+  	 filter(failure != "n")
+
+### Remove None - not informative, it is either 4 with Q11 = "some" or availability fail
+plot_q13 <- plot_q13 %>%
+	filter(failure != "none")
+
+#q7_labels[4] <- "Hardware/\nSoftware\nRequirements"
+#q7_labels[5] <- "Unique &\nPersistent\nIdentifiers"
+
+plot_q13$failure <- factor(plot_q13$failure, levels=c("unclear", "differ", "no_result", "hard_soft", "other", "none", "avail_fail"), labels=c(q13_labels, "Availability\nFail"))  #plot_q13$failure <- factor(plot_q13$failure, levels=c("unclear", "differ", "no_result", "hard_soft", "other", "none", "avail_fail"), labels=c(q13_labels, "Availability\nFail"))  	
+  	 	
+p <- ggplot(plot_q13, aes(x=failure, y=value)) 
+p <- p + geom_bar(stat = 'identity')#, width=0.8, position = position_dodge(width=0.8))
+p <- p + scale_y_continuous(name="Number of Articles", breaks=seq(0,20,2), expand = c(0, 0))
+p <- p + coord_cartesian(ylim = c(0, 11))
+p <- p + scale_x_discrete(name="Reproducibility Failure Cause", limits=c("Availability\nFail", "Unclear directions", "Did not generate results", "Hardware/software error", "Results differed", "Other"), labels=c("Availability\nFail", "Unclear\ndirections", "Did not\ngenerate results", "Hardware/software\nerror", "Results\ndiffered", "Other"))
+#p <- p + scale_fill_manual(name="Journal", values=journal_colors) 
+p <- p + theme_classic_new(9.5) +   theme(legend.position="bottom") + guides(fill = guide_legend(nrow = 1))
+p 	
+
+  
+### Save figure
+ggsave(paste0(file.path(write_figures_path,"png/"), "repro_failure_cause_bw", ".png"), p, width=5.5, height=3, dpi=600)
+ggsave(paste0(file.path(write_figures_path,"svg/"), "repro_failure_cause_bw", ".svg"), p, width=5.5, height=3)
+ggsave(paste0(file.path(write_figures_path,"pdf/"), "repro_failure_cause_bw", ".pdf"), p, width=5.5, height=3)
+
+
+reproduc_df %>%
+	filter(rep_avail == "repro") %>%
+	filter(Q13_none == TRUE)
+
+reproduc_df %>%
+	filter(rep_avail == "repro") %>%
+	filter(Q11 != "Availability\nFail") %>%
+	select(Q4, Q11, keyword) %>%
+	arrange(Q11)
+
+
+### Chi squared test of number of partially reproducible papers from keyword vs non-keyword
+prop.test(x = c(5,1), n=c(119, 241), p = NULL, alternative = "greater", correct = TRUE)
+
+	
+	
 #################
 ###  Plot time spent on paper
 ################ 
@@ -406,16 +668,22 @@ reproduc_df$Q12
 
 reproduc_df$stopping_point <- "Availability"
 reproduc_df$stopping_point[reproduc_df$Q5 != "Some or all available"] <- "Paper Type"
-reproduc_df$stopping_point[reproduc_df$Q10 == "Yes"] <- "Reproducibility"
+#reproduc_df$stopping_point[reproduc_df$Q10 == "Yes"] <- "Reproducibility"
 ### Pretty sure the long one is also a reproducibility
-reproduc_df$stopping_point[reproduc_df$Q12 > 60] <- "Reproducibility"
+reproduc_df$stopping_point[reproduc_df$rep_avail_clean == "repro" & reproduc_df$Q11 != "Availability\nFail"] <- "Reproducibility"
 reproduc_df$stopping_point <- factor(reproduc_df$stopping_point, levels = c( "Reproducibility", "Availability", "Paper Type"))
 
+### Produce summary table
+reproduc_df %>%
+	group_by(stopping_point) %>% 
+	summarize(mean_time=mean(Q12, na.rm=TRUE), median_time=median(Q12, na.rm=TRUE), perc_25=quantile(Q12, 0.25, na.rm=TRUE), perc_75=quantile(Q12, 0.75, na.rm=TRUE), min_time=min(Q12, na.rm=TRUE), max_time=max(Q12, na.rm=TRUE), count_with_time=sum(!is.na(Q12)), count=n()) %>%
+	as.data.frame()
+	
 #Q9 is yes, continu
 p <- ggplot(reproduc_df, aes(x=stopping_point, y=Q12))
 p <- p + geom_boxplot(fill="grey")
 p <- p + stat_summary(fun.y=mean, colour="#e41a1c", geom="point", shape=18, size=3,show_guide = FALSE)
-p <- p + coord_flip()
+p <- p + coord_flip(ylim=c(0,121))
 p <- p + theme_classic_new(9.5)
 p <- p + scale_x_discrete(name="Stopping Point")
 p <- p + scale_y_continuous(name="Time Spent (Minutes)", breaks=seq(0,500,15))
@@ -465,7 +733,7 @@ ggsave(paste0(file.path(write_figures_path,"pdf/"), "time_spent_ridge", ".pdf"),
 
 
 # Boxplots by journal
-p <- ggplot(subset(reproduc_df, stopping_point!="Reproducibility"), aes(x=stopping_point, y=Q12, fill=Q2_abbrev))
+p <- ggplot(reproduc_df, aes(x=stopping_point, y=Q12, fill=Q2_abbrev))
 p <- p + geom_boxplot()
 #p <- p + stat_summary(fun.y=mean, colour="#e41a1c", geom="point", shape=18, size=3,show_guide = FALSE)
 p <- p + scale_fill_manual(name="Journal", values=journal_colors) 

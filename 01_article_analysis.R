@@ -279,70 +279,12 @@ pub_table$journal_abbrev <- c("EM&S", "HESS", "JAWRA", "JoH", "JWRP&M", "WRR" )
 write_file <- file.path(write_output_base_path, "articles/pub_summary_table.csv")
 write.csv(pub_table, write_file)
 
-
-###########################################################################
-## Plot papers by keyword
-###########################################################################
-plot_articles <- pub_summary_table %>%
- 	select(-journal, -X, -total) %>%
- 	gather(keyword, count, -journal_abbrev)
-
-plot_articles$keyword[plot_articles$keyword == "keyword"] <- "Keyword"
-plot_articles$keyword[plot_articles$keyword == "none"] <- "None"
-
-
-pub_table$keyword_prop <- pub_table$keyword / pub_table$total
-#pub_table$labels <- paste0(pub_table$total, " [", pub_table$keyword, " : ", pub_table$none,"]")
-pub_table$labels <- paste0(pub_table$keyword, " : ", pub_table$none," [", pub_table$total, "]")
-#pub_table$labels <- paste0(" [", pub_table$total, "] ", pub_table$keyword, " : ", pub_table$none)
-
-### Plot black and white
-  p <- ggplot(data = plot_articles, aes(x = journal_abbrev)) 
-  p <- p + geom_bar(aes(y = count, fill = keyword), stat = 'identity')
-  p <- p + geom_text(data=pub_table, aes(y = total + 10, label=labels), vjust=0, size=2.3)
-  p <- p + scale_y_continuous(name="Articles in 2017", expand = c(0, 0), limits=c(0,720), breaks=seq(0,800,200))
-  p <- p + scale_x_discrete(name="Journal")
-  p <- p + scale_fill_manual(name="Keyword", values=c("grey20", "grey70"))
-  p <- p + theme_classic_new(9.5) +   theme(legend.position="bottom")
-  p 
-  
-### Save figure
-ggsave(paste0(file.path(write_figures_path,"png/"), "article_keyword_by_journal", "_bw.png"), p, width=5, height=3, dpi=600)
-ggsave(paste0(file.path(write_figures_path,"svg/"), "article_keyword_by_journal", "_bw.svg"), p, width=5, height=3)
-ggsave(paste0(file.path(write_figures_path,"pdf/"), "article_keyword_by_journal", "_bw.pdf"), p, width=5, height=3)
-
-
-plot_articles$fill <- paste0(plot_articles$journal_abbrev, "--", plot_articles$keyword)
-
-journal_colors <- cb_pal("custom", n=6, sort=FALSE)
-
-journal_colors_black <- rep(journal_colors, each=2)
-journal_colors_black[seq(1, length(journal_colors_black), 2)] <- "grey30"
-journal_colors_black
-
-### Plot using same colors
-  p <- ggplot(data = plot_articles, aes(x = journal_abbrev)) 
-  p <- p + geom_bar(aes(y = count, fill = fill), stat = 'identity')
-  p <- p + geom_text(data=pub_table, aes(y = total + 10, label=labels), vjust=0, size=2.3)
-  p <- p + scale_y_continuous(name="Articles in 2017", expand = c(0, 0), limits=c(0,720), breaks=seq(0,800,200))
-  p <- p + scale_x_discrete(name="Journal")
-  p <- p + scale_fill_manual(name="Keyword", values=journal_colors_black)
-  p <- p + theme_classic_new(9.5) +   theme(legend.position="none")
-  p 
-
-  cvd_grid(p)
-
-### Save figure
-ggsave(paste0(file.path(write_figures_path,"png/"), "article_keyword_by_journal", "_color.png"), p, width=5, height=3, dpi=600)
-ggsave(paste0(file.path(write_figures_path,"svg/"), "article_keyword_by_journal", "_color.svg"), p, width=5, height=3)
-ggsave(paste0(file.path(write_figures_path,"pdf/"), "article_keyword_by_journal", "_color.pdf"), p, width=5, height=3)
-
   
 ###########################################################################
 ## Prepare to randomly sample
 ###########################################################################
 
-common_ratio_est <- round((pub_table[,3]/sum(pub_table[,3]))*360)
+common_ratio_est <- round((pub_table[,4]/sum(pub_table[,4]))*360)
 common_ratio_est
 
 corrected_ratio_est <- common_ratio_est
@@ -359,7 +301,7 @@ corrected_ratio_est[6] <- corrected_ratio_est[6] - 15
 
 sum(corrected_ratio_est)
 
-required_nonkeyword <- corrected_ratio_est - pub_table[,1]
+required_nonkeyword <- corrected_ratio_est - pub_table[,2]
 
 for (j in seq(1,length(required_nonkeyword))){
 	

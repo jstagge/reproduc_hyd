@@ -7,15 +7,15 @@ rm(list=ls())
 ###  Install packages 
 ###########################################################################
 ### Packages from CRAN
-install.packages(assertthat)
-install.packages(tidyverse)
-install.packages(colorblindr)
+install.packages("assertthat")
+install.packages("tidyverse")
+install.packages("colorblindr")
 
-install.packages(stringr)
-install.packages(ggridges)
-install.packages(ggthemes)
-install.packages(riverplot)
-install.packages(tspmeta)
+install.packages("stringr")
+install.packages("ggridges")
+install.packages("ggthemes")
+install.packages("riverplot")
+install.packages("tspmeta")
 
 
 ### Packages from GitHub
