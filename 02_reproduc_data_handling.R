@@ -532,23 +532,3 @@ q13_journal_perc  <- q13_journal_count %>%
 save(reproduc_df, pub_summary_table, q6_labels, q6_journal_perc, q6_journal_count, q7_journal_perc, q7_journal_count, q9_labels, q11_labels, q13_labels, q13_journal_count, q13_journal_perc, file=file.path(write_output_base_path, "reproduc_data.rda"))
 
 
-
-
-
-yup <- q13_df %>%
-	filter(rep_avail == "repro") %>%
-	select(-Q2_abbrev, -Q3, -Q13, -rep_avail) %>%
-	gather() %>%
-	filter(value == TRUE)
-	
-ggplot(yup, aes(x=key)) + geom_bar()
-
-
-yup <- reproduc_df %>%
-	filter(rep_avail == "repro") %>%
-	select(Q2_abbrev, Q3, Q11, Q13, rep_avail) 
-	
-	
-
-
- 

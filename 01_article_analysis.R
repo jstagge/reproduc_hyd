@@ -346,20 +346,3 @@ paper_assign <- with(paper_assign, paper_assign[order(Reviewer, index),])
 write.csv(paper_assign, "paper_assign_github.csv", row.names=FALSE)
 
 
-
-
-
-
-https://doi.org/10.5194/hess-21-3619-2017
-
-
-Pages
-Volume
-Publication.Title
-Title
-Author
-Publication.Year
-
-DOI 
-
-URL
