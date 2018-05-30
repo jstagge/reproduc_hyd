@@ -276,6 +276,8 @@ pub_table$journal_abbrev <- c("EM&S", "HESS", "JAWRA", "JoH", "JWRP&M", "WRR" )
 ###########################################################################
 ## Write publication summary table
 ###########################################################################
+dir.create(file.path(write_output_base_path, "articles/"))
+
 write_file <- file.path(write_output_base_path, "articles/pub_summary_table.csv")
 write.csv(pub_table, write_file)
 
