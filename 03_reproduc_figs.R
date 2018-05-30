@@ -87,10 +87,12 @@ sapply(file.path(global_path, file.sources),source)
 ###########################################################################
 ## Set Initial Values
 ###########################################################################
-
-journal_abbrev <- c("EM&S", "HESS", "JoH", "JAWRA", "JWRP&M", "WRR")
+### Order modified for clarity
+journal_abbrev <- c("EM&S", "HESS", "WRR", "JoH", "JAWRA", "JWRP&M")
 journal_colors <- cb_pal("custom", n=6, sort=FALSE)
-journal_colors <- journal_colors[c(1, 2, 4, 3, 5, 6)]
+#journal_colors <- journal_colors[c(1, 2, 4, 3, 5, 6)]
+journal_colors <- journal_colors[c(4, 2, 1, 3, 5, 6)]
+
 
 ###########################################################################
 ## Set Additional Output Folders
@@ -212,8 +214,6 @@ ggsave(paste0(file.path(write_figures_path,"pdf/"), "article_keyword_by_journal"
 
 plot_articles_population$fill <- paste0(plot_articles_population$journal_abbrev, "--", plot_articles_population$keyword)
 
-journal_colors <- cb_pal("custom", n=6, sort=FALSE)
-journal_colors <- journal_colors[c(1, 2, 4, 3, 5, 6)]
 
 journal_colors_black <- rep(journal_colors, each=2)
 journal_colors_black[seq(1, length(journal_colors_black), 2)] <- "grey30"
@@ -454,6 +454,98 @@ p <- p + scale_fill_manual(values=c("grey15", "grey35", "grey60", "grey80"))
 ggsave(paste0(file.path(write_figures_path,"png/"), "avail_source_by_journal", "_bw.png"), p, width=5, height=3.25, dpi=600)
 ggsave(paste0(file.path(write_figures_path,"svg/"), "avail_source_by_journal", "_bw.svg"), p, width=5, height=3.25)
 ggsave(paste0(file.path(write_figures_path,"pdf/"), "avail_source_by_journal", "_bw.pdf"), p, width=5, height=3.25)
+
+
+
+###########################################################################
+###  Plot Combined Q5 and Q6
+###########################################################################
+### Use Q6 for Some available, Q5 for the rest
+reproduc_df <- reproduc_df %>%
+	mutate(Q5_6 = case_when(
+		Q5 == "Dataless or review" ~ "Dataless or review",
+		Q5 == "No availability" ~ "No availability",	
+		Q5 == "Some or all available" & Q6_grouping == "Some or All\nAvailable Online" ~ "Some or All\nAvailable Online",	
+		Q5 == "Some or all available" & Q6_grouping == "Only In\nArticle" ~ "Only In\nArticle",	
+		Q5 == "Some or all available" & Q6_grouping == "Author\nRequest" ~ "Author\nRequest",	
+		Q5 == "Some or all available" & Q6_grouping == "Third\nParty" ~ "Third\nParty",							
+		TRUE ~ NA_character_)
+	) 
+
+### Check that numbers add correctly and no NAs
+table(reproduc_df$Q5_6)
+
+### Refactor labels
+reproduc_df$Q5_6 <- factor(reproduc_df$Q5_6, levels= c("No availability", "Dataless or review", "Third\nParty", "Author\nRequest", "Only In\nArticle", "Some or All\nAvailable Online"))
+
+### Create count table
+plot_Q5_6 <- reproduc_df %>% 
+	filter(rep_avail_clean == "avail") %>%
+	dplyr::select(Q2_abbrev, Q5_6) %>%
+	count(Q2_abbrev, Q5_6) %>%  
+	complete(Q2_abbrev, Q5_6, fill = list(n = 0)) %>% 
+	mutate(prop_all = prop.table(n)) %>%
+	group_by(Q2_abbrev) %>% 
+	mutate(prop_by_journal = n/sum(n)) %>% 
+	as.data.frame()
+
+	
+
+
+plot_Q5_6$Q2_abbrev <- factor(plot_Q5_6$Q2_abbrev, levels=c("EM&S", "HESS", "WRR", "JoH", "JAWRA", "JWRP&M"))
+plot_Q5_6$Q5_6 <- factor(plot_Q5_6$Q5_6, levels=rev(levels(plot_Q5_6$Q5_6)))
+
+
+### Plot as separate bars  
+  p <- ggplot(data = plot_Q5_6, aes(x = Q2_abbrev, y = prop_by_journal, fill = Q5_6)) 
+  p <- p + geom_bar(stat = 'identity', width=0.8, position = position_dodge(width=0.8))
+  p <- p + scale_y_continuous(name="Proportion of Articles", labels = scales::percent, expand = c(0, 0), limits = c(0, 0.7))
+  p <- p + scale_x_discrete(name="Journal")
+  p <- p + scale_fill_manual(name="Availability claim", values=cb_pal("ptol", n=6, sort=FALSE)[c(3, 6, 1, 2, 4, 5)])#, limits=levels(avail_journal$Q5_leading)) 
+  #  p <- p + scale_fill_manual(name="Availability claim", values=c("purple", "red", "darkblue", "blue", "yellow", "green"))
+  p <- p + theme_classic_new(9.5) +   theme(legend.position="bottom")
+  p <- p + guides(fill = guide_legend(nrow = 2, byrow=TRUE, title.position="top", title.hjust=0))
+   p 
+
+### Save figure
+ggsave(paste0(file.path(write_figures_path,"png/"), "q5_q6_combined_byjournal_bar", "_color.png"), p, width=5.5, height=4, dpi=600)
+ggsave(paste0(file.path(write_figures_path,"svg/"), "q5_q6_combined_byjournal_bar", "_color.svg"), p, width=5.5, height=4)
+ggsave(paste0(file.path(write_figures_path,"pdf/"), "q5_q6_combined_byjournal_bar", "_color.pdf"), p, width=5.5, height=4)
+
+
+  p <- ggplot(data = plot_Q5_6, aes(x = Q5_6, y = prop_by_journal, fill = Q2_abbrev)) 
+  p <- p + geom_bar(stat = 'identity', width=0.8, position = position_dodge(width=0.8))
+  p <- p + scale_y_continuous(name="Proportion of Articles", labels = scales::percent, expand = c(0, 0), limits = c(0, 0.7))
+  p <- p + scale_x_discrete(name="Data Availability")
+  p <- p + scale_fill_manual(name="Journal", values=journal_colors) 
+ # p <- p + scale_fill_manual(name="Availability claim", values=cb_pal("custom", n=3, sort=FALSE), limits=levels(avail_journal$Q5_leading)) 
+  p <- p + theme_classic_new(9.5) +   theme(legend.position="bottom")
+  p <- p + guides(fill = guide_legend(nrow = 1, byrow=TRUE, title.position="top", title.hjust=0.5))
+  p 
+
+### Save figure
+ggsave(paste0(file.path(write_figures_path,"png/"), "q5_q6_combined_byelement_bar", "_color.png"), p, width=5.5, height=4, dpi=600)
+ggsave(paste0(file.path(write_figures_path,"svg/"), "q5_q6_combined_byelement_bar", "_color.svg"), p, width=5.5, height=4)
+ggsave(paste0(file.path(write_figures_path,"pdf/"), "q5_q6_combined_byelement_bar", "_color.pdf"), p, width=5.5, height=4)
+
+
+### Refactor labels
+plot_Q5_6$Q5_6 <- factor(plot_Q5_6$Q5_6, levels= c("Dataless or review","No availability", "Third\nParty", "Author\nRequest", "Only In\nArticle", "Some or All\nAvailable Online"))
+
+### Plot as stacked bars    	
+  p <- ggplot(data = plot_Q5_6, aes(x = Q2_abbrev, y = prop_by_journal, fill = Q5_6)) 
+  p <- p + geom_bar(stat = 'identity', position = 'stack', width=0.7)
+  p <- p + scale_y_continuous(name="Proportion of Articles", labels = scales::percent, expand = c(0, 0), limits = c(0, 1))
+  p <- p + scale_x_discrete(name="Journal")
+  p <- p + scale_fill_manual(name="Availability claim", values=rev(cb_pal("ptol", n=6, sort=FALSE)[c(3, 6, 1, 2, 5, 4)]))#, limits=levels(avail_journal$Q5_leading)) 
+  p <- p + theme_classic_new(9.5) +   theme(legend.position="bottom")
+  p <- p + guides(fill = guide_legend(nrow = 2, byrow=TRUE, title.position="top", title.hjust=0, reverse=TRUE))
+  p 
+  
+### Save figure
+ggsave(paste0(file.path(write_figures_path,"png/"), "q5_q6_combined_byjournal_stack", "_color.png"), p, width=5.5, height=4, dpi=600)
+ggsave(paste0(file.path(write_figures_path,"svg/"), "q5_q6_combined_byjournal_stack", "_color.svg"), p, width=5.5, height=4)
+ggsave(paste0(file.path(write_figures_path,"pdf/"), "q5_q6_combined_byjournal_stack", "_color.pdf"), p, width=5.5, height=4)
 
 
 
