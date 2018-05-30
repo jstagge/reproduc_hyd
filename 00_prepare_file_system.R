@@ -16,6 +16,7 @@ install.packages("ggridges")
 install.packages("ggthemes")
 install.packages("riverplot")
 install.packages("tspmeta")
+install.packages("svglite")
 
 
 ### Packages from GitHub
