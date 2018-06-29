@@ -275,7 +275,14 @@ to_plot
 to_plot$journal_abbrev <- factor(to_plot$journal_abbrev, levels=journal_abbrev)
 
 #journal_colors_light<- c("#88EE99","#9AFFFF","#AADDFF","#FFB3C4","#F3F385","#FF99DD")
-journal_colors_light<- c("#88EE99","#9AFFFF", "#F3F385","#AADDFF", "#FF99DD", "#FFB3C4")
+#journal_colors_light<- c("red","blue","purple","green","brown","grey")
+journal_colors_light<- c("#88EE99","#9AFFFF","#FFB3C4","#AADDFF","#F3F385","#FF99DD")
+#F3F385 - yellow
+#FF99DD - pinkish purple
+#FFB3C4 - pink
+#AADDFF - light blue
+#9AFFFF - cyan
+#88EE99 - green
 
 journal_colors_black <- rep(journal_colors, each=4)
 journal_colors_black[seq(1, length(journal_colors_black), 4)] <- "grey20"
@@ -564,8 +571,8 @@ plot_q7 <- q7_journal_perc%>%
   	 gather(key=source, value=value, -Q2_abbrev) %>%
   	 filter(Q2_abbrev !="Total")
 
-q7_labels <- c("Directions\nto run", "Code/Model/\nSoftware", "Input\ndata", "Hardware/Software\nRequirements", "Unique & Persistent\nIdentifiers", "Metadata", "Common File\nFormats")
-
+plot_q7 <- plot_q7 %>%
+	complete(Q2_abbrev, source, fill = list(value = 0))  
 
 #Directions to run
 #Code/Model/Software
@@ -579,17 +586,16 @@ q7_labels <- c("Directions\nto run", "Code/Model/\nSoftware", "Input\ndata", "Ha
 plot_q7$facet <- "Secondary"
 plot_q7$facet[plot_q7$source %in% c("dir", "code", "data")] <- "Required"
 
+q7_labels <- c("Some Input\ndata", "Code/Model/\nSoftware", "Directions\nto run",  "Hardware/\nSoftware\nRequirements", "Common File\nFormats", "Unique &\nPersistent\nIdentifiers", "Metadata")
 
-q7_labels[4] <- "Hardware/\nSoftware\nRequirements"
-q7_labels[5] <- "Unique &\nPersistent\nIdentifiers"
-
-plot_q7$source <- factor(plot_q7$source, levels=c("dir", "code", "data", "hardw", "doi", "meta", "common"), labels=q7_labels)  	
+plot_q7$source <- factor(plot_q7$source, levels=c("data", "code", "dir", "hardw","common", "doi", "meta"), labels=q7_labels)  	
+plot_q7$Q2_abbrev <- factor(plot_q7$Q2_abbrev, levels=journal_abbrev)  	
   	 	
 p <- ggplot(subset(plot_q7, source != "None"), aes(x=source, y=value, fill=Q2_abbrev)) 
 p <- p + geom_bar(stat = 'identity', width=0.8, position = position_dodge(width=0.8))
 p <- p + scale_y_continuous(name="Proportion of Articles", labels = scales::percent, expand = c(0, 0), limits = c(0, .5))
 p <- p + scale_x_discrete(name="Availability Elements")
-p <- p + scale_fill_manual(name="Journal", values=journal_colors) 
+p <- p + scale_fill_manual(name="Journal", values=journal_colors[c(1, 2, 6, 5, 4, 3)]) 
 p <- p + facet_grid(. ~ facet, drop=TRUE, scales="free_x")
 p <- p + theme_classic_new(9.5) +   theme(legend.position="bottom") + guides(fill = guide_legend(nrow = 1))
 p 	
@@ -852,32 +858,20 @@ ggsave(paste0(file.path(write_figures_path,"pdf/"), "time_spent_box_byjournal", 
 ###  River Plot
 ################ 
 
-#cb_pal("custom", n=3, sort=FALSE)
-#"#4477AA" blue
-#"#CCBB44" yellow
-#"#EE6677" red
-
-
 #######################
 ###  First edge/node
 #######################
-#  ### Data prept
-#  reproduc_df$Q5_num <- as.numeric(reproduc_df$Q5)
-#  head(reproduc_df$Q5_num )
-#  q5_options <- seq(1,length(levels(reproduc_df$Q5)))
-#  q5_levels <- paste0("Q5_", q5_options)
-#  reproduc_df$Q5_num <- factor(reproduc_df$Q5_num, levels=q5_options, labels=q5_levels)
-#  levels(reproduc_df$Q5)
-#  q5_labels <- c("Dataless", "Not\nSpecified", "Some\nAvailable")
-
-reproduc_df$Q5 <- factor(reproduc_df$Q5, levels=levels(reproduc_df$Q5)[c(2, 1, 3)])
-reproduc_df$Q5_num <- as.numeric(reproduc_df$Q5)
-q5_options <- seq(1,length(levels(reproduc_df$Q5)))
-q5_levels <- paste0("Q5_", q5_options)
-reproduc_df$Q5_num <- factor(reproduc_df$Q5_num, levels=q5_options, labels=q5_levels)
+reproduc_df <- reproduc_df %>%
+	mutate(Q5_num = case_when(
+		Q5 == "Some or all available" ~ "Q5_3",
+		Q5 == "No availability" ~ "Q5_2",	
+		Q5 == "Dataless or review" ~ "Q5_1",						
+		TRUE ~ NA_character_)
+	) 
 
 ### Calculate Edges  
 q5_freq <- reproduc_df %>% 
+		filter(rep_avail_clean == "avail") %>% 
 		group_by(Q5_num) %>%
 		summarize(Count = n()) %>%
 		spread(Q5_num, Count, fill = 0) %>%
@@ -890,46 +884,39 @@ q5_freq$Value <- q5_freq$value
 	
 paper_edges_level2 <- q5_freq %>% dplyr::select(N1, N2, Value)
 
-q5_labels <- levels(reproduc_df$Q5)
-#q5_labels <- c("No\navailability", "Dataless", "Some or all\navailable")
+#q5_labels <- levels(reproduc_df$Q5)
+q5_labels <- c("Dataless\nor review [34]", "No\navailability [73]", "Some\navailability [253]")
 #q5_levels <- paste0("Q5_", seq(1,length(q5_labels)))
 
 ### Calculate nodes 
-paper_nodes_level1 <- data.frame(ID="Q0_1", x=1, y=1, labels="All Papers")
-paper_nodes_level2 <- data.frame(ID=q5_levels, x=2, y=c(0,1, 2), labels=q5_labels)
+paper_nodes_level1 <- data.frame(ID="Q0_1", x=1, y=400, labels="All\npapers\n[360]")
+paper_nodes_level2 <- data.frame(ID=c("Q5_1", "Q5_2", "Q5_3"), x=c(2, 2, 2), y=c(0,150, 453.5), labels=q5_labels)
 
-paper_nodes_level1$col <- c("grey")
-paper_nodes_level2$col <- c("#EE6677", "#CCBB44", "#4477AA")
+paper_nodes_level1$col <- c("#4477AA")
+paper_nodes_level2$col <- c("#EFE8B6", "#EFE8B6", "#4477AA")
 
 #######################
 ###  Q5 to Q6
-#######################
-  
-### Data prep
-#reproduc_df$Q6_grouping <- "No"
-### If it contains Tin article at all
-#reproduc_df$Q6_grouping[str_detect(reproduc_df$Q6, "figures/tables")] <- "In\nArticle"
-### If available in paper
-#reproduc_df$Q6_grouping[str_detect(reproduc_df$Q6, "online")] <- "Some or\nAll Available"
-### If it contains Author Request at all
-#reproduc_df$Q6_grouping[str_detect(reproduc_df$Q6, "Author")] <- "Author\nRequest"
-### If it contains Third Party Request at all (trumps Author Request)
-#reproduc_df$Q6_grouping[str_detect(reproduc_df$Q6, "Third Party")] <- "Third\nParty"
+#######################  
+reproduc_df <- reproduc_df %>%
+	mutate(Q6_num = case_when(
+		Q6_grouping == "Some or All\nAvailable Online" | Q6_grouping == "Only In\nArticle"  ~ "Q6_3",
+		Q6_grouping == "Author\nRequest" ~ "Q6_2",	
+		Q6_grouping == "Third\nParty"  ~ "Q6_1",						
+		TRUE ~ NA_character_)
+	) 
+		
+reproduc_df$Q6_num <- factor(reproduc_df$Q6_num, levels=paste0("Q6_", seq(1,3)))		
 
-#q6_labels <- c("Some or\nAll Available", "In\nArticle", "Author\nRequest", "Third\nParty", "No")
-#reproduc_df$Q6_grouping <- factor(reproduc_df$Q6_grouping, levels=q6_labels)
- 
-reproduc_df$Q6_num <- as.numeric(reproduc_df$Q6_grouping)
-head(reproduc_df$Q6_num )
-q6_options <- seq(1,length(levels(reproduc_df$Q6_grouping)))
-q6_levels <- paste0("Q6_", q6_options)
-reproduc_df$Q6_num <- factor(reproduc_df$Q6_num, levels=q6_options, labels=q6_levels)
-   
 ### Calculate Edges  
 q6_freq <- reproduc_df %>% 
+		filter(rep_avail_clean == "avail") %>% 
+		filter(Q5_num == "Q5_3") %>% 
 		group_by(Q5_num, Q6_num) %>%
 		summarize(Count = n()) %>%
+		complete(Q6_num, fill = list(Count = 0)) %>%
 		as.data.frame()
+
 
 paper_edges_level3 <- q6_freq %>%
 	mutate(N1=Q5_num, N2=Q6_num) %>%
@@ -937,44 +924,36 @@ paper_edges_level3 <- q6_freq %>%
 	dplyr::select(N1, N2, Value)
 
 
-
+q6_labels <- c("Contact\nthird party [10]", "Contact\nfirst author [68]", "Some\nonline [175]")
+#q6_labels <- c("q6_1", "q6_2", "q6_3")
 
 ### Calculate nodes 
-paper_nodes_level3 <- data.frame(ID=q6_levels, x=3, y=c(4,3,2,1,0), labels=q6_labels)
+paper_nodes_level3 <- data.frame(ID=c("Q6_1", "Q6_2", "Q6_3"), x=c(3, 3, 3), y=c(100, 250, 492.5), labels=q6_labels)
 
 
-paper_nodes_level3$col <- "#EE6677"
-paper_nodes_level3$col[paper_nodes_level3$ID == "Q6_1"] <- "#4477AA"
-paper_nodes_level3$col[paper_nodes_level3$ID == "Q6_2"] <- "#4477AA"
-
-
-
-
+paper_nodes_level3$col <- "#EFE8B6"
+paper_nodes_level3$col[paper_nodes_level3$ID == "Q6_3"] <- "#4477AA"
 
 #######################
 ###  Q6 to Q7
 #######################
    
-reproduc_df$Q7_num <- as.numeric(reproduc_df$Q7_primary_n)
-head(reproduc_df$Q7_num )
-q7_options <- seq(0,3)
-q7_levels <- paste0("Q7_", q7_options)
-reproduc_df$Q7_num <- factor(reproduc_df$Q7_num, levels=q7_options, labels=q7_levels)
-   
-### Tweak q7 frequency
-### Force Author request (Q6_3) and Third party (Q6_4) to None (Q7_0)
-q7_test <- reproduc_df$Q6_num == "Q6_3" & reproduc_df$Q7_num != "Q7_0" 
-reproduc_df$Q7_num[q7_test] <- "Q7_0"
-
-q7_test <- reproduc_df$Q6_num == "Q6_4" & reproduc_df$Q7_num != "Q7_0" 
-reproduc_df$Q7_num[q7_test] <- "Q7_0"
-#reproduc_df$Q7_num <- factor(reproduc_df$Q7_num, levels=q7_options, labels=q7_levels)
-reproduc_df$Q7_num <- factor(reproduc_df$Q7_num, levels=q7_levels)
+reproduc_df <- reproduc_df %>%
+	mutate(Q7_num = case_when(
+		Q7_primary_n == 0  ~ "Q7_1",
+		Q7_primary_n == 1  ~ "Q7_2",
+		Q7_primary_n == 2  ~ "Q7_3",					
+		Q7_primary_n == 3  ~ "Q7_4",					
+		TRUE ~ NA_character_)
+	) 
 
 ### Calculate Edges  
 q7_freq <- reproduc_df %>% 
+		filter(rep_avail_clean == "avail") %>% 
+		filter(Q6_num == "Q6_3") %>% 
 		group_by(Q6_num, Q7_num) %>%
 		summarize(Count = n()) %>%
+		complete(Q7_num, fill = list(Count = 0)) %>%
 		as.data.frame()
 
 q7_freq
@@ -986,46 +965,56 @@ paper_edges_level4 <- q7_freq %>%
 
 ### Calculate nodes 
 #q7_labels <- paste0("Primary ", seq(0,3))
-q7_labels <- c("None", "1 Element", "2 Elements", "Directions\nCode\n& Data")
-paper_nodes_level4 <- data.frame(ID=q7_levels, x=4, y=c(0.5,1.5,2.5,4), labels=q7_labels)
+q7_labels <- c("No elements [51]", "Only 1\nelement [80]", "Only 2\nelements [24]", "Directions, code\n& data [20]")
+#q7_labels <- c("q7_1", "q7_2", "q7_3", "q7_4")
 
-paper_nodes_level4$col <- "#EE6677"
-paper_nodes_level4$col[paper_nodes_level4$ID == "Q7_3"] <- "#4477AA"
-paper_nodes_level4$col[paper_nodes_level4$ID == "Q7_2"] <- "#CCBB44"
-paper_nodes_level4$col[paper_nodes_level4$ID == "Q7_1"] <- "#CCBB44"
+### Calculate nodes 
+paper_nodes_level4 <- data.frame(ID=c("Q7_1", "Q7_2", "Q7_3", "Q7_4"), x=c(4, 4, 4, 4), y=c(150,275,400,570.5), labels=q7_labels)
+
+paper_nodes_level4$col <- "#4477AA"
+paper_nodes_level4$col[paper_nodes_level4$ID == "Q7_3"] <- "#EFE8B6"
+paper_nodes_level4$col[paper_nodes_level4$ID == "Q7_2"] <- "#EFE8B6"
+paper_nodes_level4$col[paper_nodes_level4$ID == "Q7_1"] <- "#EFE8B6"
 
 
 #######################
-###  Q7 to Q9
+###  Q7 to Q11
 #######################
-   
-reproduc_df$Q9_num <- as.numeric(reproduc_df$Q9)
-head(reproduc_df$Q9_num)
-q9_options <- seq(1,length(levels(reproduc_df$Q9)))
-q9_levels <- paste0("Q9_", q9_options)
-reproduc_df$Q9_num <- factor(reproduc_df$Q9_num, levels=q9_options, labels=q9_levels)
-   
+
+reproduc_df <- reproduc_df %>%
+	mutate(Q11_num = case_when(
+		Q11 == "Availability\nFail"  ~ "Q11_1",
+		Q11 == "No"  ~ "Q11_2",
+		Q11 == "Some"  ~ "Q11_3",					
+		Q11 == "Yes"  ~ "Q11_4",					
+		TRUE ~ NA_character_)
+	) 
+
 ### Calculate Edges  
-q9_freq <- reproduc_df %>% 
-		group_by(Q7_num, Q9_num) %>%
+q11_freq <- reproduc_df %>% 
+		filter(rep_avail_clean == "repro") %>% 
+		group_by( Q11_num) %>%
 		summarize(Count = n()) %>%
+		complete(Q11_num, fill = list(Count = 0)) %>%
 		as.data.frame()
 
-paper_edges_level5 <- q9_freq %>%
-	mutate(N1=Q7_num, N2=Q9_num) %>%
+q11_freq
+
+paper_edges_level5 <- q11_freq %>%
+	mutate(N1="Q7_4", N2=Q11_num) %>%
 	mutate(Value = Count) %>%
 	dplyr::select(N1, N2, Value)
 
 ### Calculate nodes 
-paper_nodes_level5 <- data.frame(ID=q9_levels, x=5, y=c(4,3.5,3,0.5), labels=q9_labels)
+q11_labels <- c("Availability\nfailure [10]", "Not replicable\n[4]", "Some replicable\n[4]", "Fully replicable\n[2]")
 
-paper_nodes_level5$col <- "#EE6677"
-paper_nodes_level5$col[paper_nodes_level5$ID == "Q9_1"] <- "#4477AA"
-paper_nodes_level5$col[paper_nodes_level5$ID == "Q9_2"] <- "#CCBB44"
-paper_nodes_level5$col[paper_nodes_level5$ID == "Q9_3"] <- "#CCBB44"
+### Calculate nodes 
+paper_nodes_level5 <- data.frame(ID=c("Q11_1", "Q11_2", "Q11_3", "Q11_4"), x=c(5, 5, 5, 5), y=c(200,300,475,579), labels=q11_labels)
 
-
-
+paper_nodes_level5$col <- "#4477AA"
+#paper_nodes_level5$col[paper_nodes_level5$ID == "Q11_3"] <- "#CCBB44"
+paper_nodes_level5$col[paper_nodes_level5$ID == "Q11_2"] <- "#EFE8B6"
+paper_nodes_level5$col[paper_nodes_level5$ID == "Q11_1"] <- "#EFE8B6"
 
 ################################
 ###  Combine all data
@@ -1047,23 +1036,28 @@ plot(rp)
 
 river <- makeRiver( paper_nodes, paper_edges )
 style <- riverplot::default.style()
-style$srt <- "0"
 
-style$textpos <- 2 #4
-# change the font size
-style$textcex <- 1.2
+style[["srt"]] <- "90"
+style[["textpos"]] <- "4"
+style[["textcex"]] <- 1.4
 
-plot( river, default_style= style )
+style[["srt"]] <- "0"
+plot( river, default_style= style , yscale=1, fix.pdf=TRUE)
 
 river_file <- paste0(file.path(write_figures_path,"png/"), "papers_riverplot")
 
 png(paste0(river_file, '.png'), width = 13, height = 9, units = 'in', res = 300)
-plot( river, default_style= style )
+plot( river, default_style= style , yscale=1, fix.pdf=TRUE)
 dev.off()
 
 river_file <- paste0(file.path(write_figures_path,"svg/"), "papers_riverplot")
 svg(paste0(river_file, '.svg'), width = 13, height = 9)#, units = 'in')#, res = 300)
-plot( river, default_style= style )
+plot( river, default_style= style , yscale=1, fix.pdf=TRUE)
+dev.off()
+
+river_file <- paste0(file.path(write_figures_path,"pdf/"), "papers_riverplot")
+pdf(paste0(river_file, '.pdf'), width = 13, height = 9)#, units = 'in')#, res = 300)
+plot( river, default_style= style , yscale=1, fix.pdf=TRUE)
 dev.off()
 
 
@@ -1072,98 +1066,12 @@ write.csv(paper_edges, file.path(write_output_base_path, "paper_edges.csv"))
 write.csv(paper_nodes, file.path(write_output_base_path, "paper_nodes.csv"))
 
 
+################################
+###  Save revised reproduc_df
+#################################
+### Save revised reproduc_df
+saveRDS(reproduc_df, file = file.path(write_output_base_path, "reproduc_df.rds"))
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-  
-edges = data.frame(N1 = paste0(rep(LETTERS[1:4], each = 4), rep(1:5, each = 16)),
-                   N2 = paste0(rep(LETTERS[1:4], 4), rep(2:6, each = 16)),
-                   Value = runif(80, min = 2, max = 5) * rep(c(1, 0.8, 0.6, 0.4, 0.3), each = 16),
-                   stringsAsFactors = F)
-
-edges = edges[sample(c(TRUE, FALSE), nrow(edges), replace = TRUE, prob = c(0.8, 0.2)),]
-head(edges)
-
-nodes = data.frame(ID = unique(c(edges$N1, edges$N2)), stringsAsFactors = FALSE)
-nodes$x = as.integer(substr(nodes$ID, 2, 2))
-nodes$y = as.integer(sapply(substr(nodes$ID, 1, 1), charToRaw)) - 65
-
-rownames(nodes) = nodes$ID
-head(nodes)
-
-library(RColorBrewer)
-
-palette = paste0(brewer.pal(4, "Set1"), "60")
-styles = lapply(nodes$y, function(n) {
-  list(col = palette[n+1], lty = 0, textcol = "black")
-})
-names(styles) = nodes$ID
-
-library(riverplot)
-
-rp <- list(nodes = nodes, edges = edges, styles = styles)
-class(rp) <- c(class(rp), "riverplot")
-
-plot(rp, plot_area = 0.95, yscale=0.06)
-
-
-
-
-
-require(ggalluvial)
-
-
-
-titanic_wide <- data.frame(Titanic)
-head(titanic_wide)
-
-p <- ggplot(data = titanic_wide, aes(axis1 = Class, axis2 = Sex, axis3 = Age, weight = Freq))
-p <- p + scale_x_discrete(limits = c("Class", "Sex", "Age"), expand = c(.1, .05))
-#p <- p + geom_alluvium(aes(fill = Survived)) 
-p <- p + geom_alluvium() 
-p <- p + geom_stratum() 
-p
-
-
-test_data <- data.frame(Q2=c("Pass", "Fail"), Q4=c(), Freq)
-
-
-
-+ geom_text(stat = "stratum", label.strata = TRUE) +
-  theme_minimal() +
-  ggtitle("passengers on the maiden voyage of the Titanic",
-          "stratified by demographics and survival")
-
-
-
-
-head(as.data.frame(UCBAdmissions), n = 12)
-
-
-p <- ggplot(as.data.frame(Titanic), aes(weight = Freq, axis1 = Survived, axis2 = Sex, axis3 = Class))
-	p <- p + geom_alluvium(aes(fill = Class), width = 0, knot.pos = 0, reverse = FALSE)
-	
-	 +
-  guides(fill = FALSE) +
-  geom_stratum(width = 1/8, reverse = FALSE) +
-  geom_text(stat = "stratum", label.strata = TRUE, reverse = FALSE) +
-  scale_x_continuous(breaks = 1:3, labels = c("Survived", "Sex", "Class")) +
-  ggtitle("Titanic survival by class and sex")
-  
-  
 
 
