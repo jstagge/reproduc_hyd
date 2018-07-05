@@ -145,7 +145,10 @@ yup <- final_determ %>%
 ###########################################################################
 require(MultinomialCI)
 
-n_runs <- 500
+n_runs <- 5000
+
+### Set the random seed so results can be reproduced
+set.seed(6511)
 
 start_time <- Sys.time()
 
@@ -301,6 +304,30 @@ p
 
 ### Save figure
 ggsave(paste0(file.path(write_figures_path,"png/"), "pop_vertical", ".png"), p, width=4.2, height=6, dpi=600)
+
+
+
+### Output to csv
+write.csv(yup_summary, file.path(write_output_base_path, "population_est.csv"))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 require(ggridges)

@@ -256,8 +256,10 @@ reproduc_df$Q2_abbrev <- factor(reproduc_df$Q2, levels=journal_names, labels=jou
 ###  Process Q5 - "Availability Claim"
 ###########################################################################
 ### Create a column of simplified Q5
-q5_levels <- levels(reproduc_df$Q5)
-reproduc_df$Q5 <- factor(reproduc_df$Q5, levels=q5_levels, labels=c("Dataless or review", "No availability", "Some or all available"))
+q5_levels <- c("Not applicable - dataless paper/review paper", "Not specified where they got the data/where data is", "Some or all applicable (available, third party request, author request)")
+q5_labels <- c("Dataless or review", "No availability", "Some or all available")
+
+reproduc_df$Q5 <- factor(reproduc_df$Q5, levels=q5_levels, labels=q5_labels)
 
 ###########################################################################
 ###  Process Q6 - "Availability Source"
@@ -428,8 +430,7 @@ q9_reframe[q9_reframe == ""] <- "No"
 
 ### Create labels and levels
 q9_labels <- c("Yes", "Unfamiliar Methods", "Not Sure", "No")
-q9_levels <- unique(q9_reframe)
-q9_levels <- q9_levels[c(3,4,2,1)]
+q9_levels <- c("Yes", "I'm not familiar with the required computational resources.\n(specify required computational resources (e.g., R, Fortran, Linux)", "Not sure (unclear materials.....hard to follow)", "No" )
 q9_labels
 q9_levels
 
@@ -453,8 +454,7 @@ q11_reframe[q11_reframe == ""] <- "Avail Fail"
 
 ### Create labels and levels
 q11_labels <- c("Yes", "Some", "No", "Availability\nFail")
-q11_levels <- unique(q11_reframe)
-q11_levels <- q11_levels[c(4,3,2,1)]
+q11_levels <- c("Yes", "Some", "No (explain why on the next question)", "Avail Fail")
 q11_labels
 q11_levels
 
