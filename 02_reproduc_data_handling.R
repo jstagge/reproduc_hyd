@@ -28,7 +28,7 @@ dir.create(write_output_base_path)
 ###  Load functions
 ###########################################################################
 ### Load these functions for all code
-require(colorout)
+#require(colorout)
 require(assertthat)
 require(staggefuncs)
 require(tidyverse)

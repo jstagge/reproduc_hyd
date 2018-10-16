@@ -25,7 +25,7 @@ install.packages("ggthemes")
 install.packages("riverplot")
 install.packages("tspmeta")
 install.packages("svglite")
-
+install.packages("MultinomialCI")
 
 ### Packages from GitHub
 install.packages("devtools")
