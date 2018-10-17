@@ -1,6 +1,6 @@
 # Reproducibility in Hydrology
 
-RStudio: [![Binder](http://mybinder.org/badge.svg)](http://beta.mybinder.org/v2/gh/jstagge/reproduc_hyd/r/master?urlpath=rstudio)
+RStudio: [![Binder](http://mybinder.org/badge.svg)](http://beta.mybinder.org/v2/gh/jstagge/reproduc_hyd/master?urlpath=rstudio)
 
 
 [![DOI](https://zenodo.org/badge/DOI/.svg)](https://doi.org/)
