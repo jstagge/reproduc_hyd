@@ -39,7 +39,7 @@ The following file prepares the file system, installing any necesary packages an
 ```
 Rscript 00_prepare_file_system.R
 ```
-The next script processes all articles articles from 2017, plots their keywords, separates the keyword or non-keyword papers, and randomly assigns papers to reviewers.
+The next script processes all articles from 2017, plots their keywords, separates the keyword or non-keyword papers, and randomly assigns papers to reviewers.
 
 This code will randomly assign papers, so it will not exactly reproduce results from Stagge et al. (2018).
 ```
