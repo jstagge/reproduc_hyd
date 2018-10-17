@@ -1,5 +1,8 @@
 # Reproducibility in Hydrology
 
+RStudio: [![Binder](http://mybinder.org/badge.svg)](http://beta.mybinder.org/v2/gh/jstagge/reproduc_hyd/r/master?urlpath=rstudio)
+
+
 [![DOI](https://zenodo.org/badge/DOI/.svg)](https://doi.org/)
 
 This repository contains code associated with paper, entitled, 'A novel replicability survey tool to measure and promote reproducibility in hydrology'. When run, it will replicate the results published in [Stagge et al. 2018](). It is provided here for transparency and so that other users may benefit from its underlying code. Please cite both the paper and this repository if you make use of any part of this.
