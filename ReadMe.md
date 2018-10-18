@@ -47,6 +47,7 @@ Rscript 04_pop_estimate.R
 ### Running scripts step-by-step
 The following file prepares the file system, installing any necesary packages and creating folders for model output.
 
+If you're using the cloud option, skip this step.  
 ```
 Rscript 00_prepare_file_system.R
 ```
