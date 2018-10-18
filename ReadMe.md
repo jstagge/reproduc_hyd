@@ -1,6 +1,7 @@
 # Reproducibility in Hydrology
 
 Click at this badge to execute the analysis and replicate results using R-Studio in the cloud without needing to install R or its dependencies on your local machine.   
+ 
 RStudio: [![Binder](http://mybinder.org/badge.svg)](http://mybinder.org/v2/gh/jstagge/reproduc_hyd/master?urlpath=rstudio)
 
 
@@ -63,7 +64,7 @@ Rscript 04_pop_estimate.R
 
 For any description of this methodology, please use the following citation (s):
 
-* Stagge, J.H., Rosenberg, D.E., Abdallah, A., Akbar, A., Attallah, N., and James, R. (2018) "A novel replicability survey tool to measure and promote reproducibility in hydrology." Scientific Data.
+* Stagge, J.H., Rosenberg, D.E., Abdallah, A., Akbar, A., Attallah, N., and James, R. (In review) "A novel replicability survey tool to measure and promote reproducibility in hydrology." Scientific Data.
 
 * Stagge, J.H. (2018) "Reproducibility analysis repository accompanying Stagge et al. (2018)." doi: ????????.
 
