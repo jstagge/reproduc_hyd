@@ -311,5 +311,7 @@ ggsave(file.path(write_output_path, "pop_vertical.pdf"), p,  width=4.2, height=6
 ### Output to csv
 write.csv(yup_summary, file.path(write_output_path, "population_est.csv"))
 
-
+print('===========================================================')
+print('Congratulations! You have replicated the analysis and plots. Check out the Output folder for results')
+print('===========================================================')
 
