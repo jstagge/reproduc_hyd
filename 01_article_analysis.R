@@ -328,4 +328,6 @@ paper_assign <- with(paper_assign, paper_assign[order(Reviewer, index),])
 ### Output paper assignments
 write.csv(paper_assign, file.path(write_output_path,"paper_assign_github.csv"), row.names=FALSE)
 
-
+print('===========================================================')
+print('Done. Next execuate the 02_reproduc_data_handling.R file') 
+print('===========================================================')
