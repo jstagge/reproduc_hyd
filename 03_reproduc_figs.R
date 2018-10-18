@@ -1015,5 +1015,7 @@ write.csv(paper_nodes, file.path(write_output_path, "paper_nodes.csv"))
 saveRDS(reproduc_df, file = file.path(write_output_base_path, "reproduc_df.rds"))
 
 
-
+print('===========================================================')
+print('Done. Next execuate the 04_pop_estimate.R') 
+print('===========================================================')
 
