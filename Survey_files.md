@@ -7,7 +7,7 @@ Feel free to share the survey using this public link https://goo.gl/LPCTEz
 You can access a public survey form at this link https://goo.gl/LPCTEz. Please make a copy of the form to your own Google Driveaccount and then edit it. Leave this public form as-is to match the original one.    
 
 ### Edit the survey logic flowchart file
-You can access a public flochart logic at this link https://goo.gl/UzTzyP. Please make a copy of the file to your own Google Drive account and then edit it. Leave this public file as-is to match the original one.    
+You can access a public flochart survey logic at this link https://goo.gl/UzTzyP. Please make a copy of the file to your own Google Drive account and then edit it. Leave this public file as-is to match the original one. Thanks to [Draw.io App](https://www.draw.io/)     
 
 
 ![](https://github.com/jstagge/reproducibility/blob/master/Reproducibility_FlowChart.png)
