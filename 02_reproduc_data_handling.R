@@ -85,7 +85,7 @@ reproduc_df$Q3 <- as.character(reproduc_df$Q3)
 ###########################################################################
 ###  Read in publication summary table
 ###########################################################################
-pub_summary_table <- read.csv(file.path(data_path, "article_analysis/pub_summary_table.csv"))
+pub_summary_table <- read.csv(file.path(output_path,"article_analysis/pub_summary_table.csv"))
 
 ### Add  publication abbreviations to publication summary table
 pub_summary_table$journal_abbrev <- factor(pub_summary_table$journal_abbrev, levels=journal_abbrev)
@@ -477,4 +477,6 @@ q13_journal_perc  <- q13_journal_count %>%
 ###########################################################################
 save(reproduc_df, pub_summary_table, q6_labels, q6_journal_perc, q6_journal_count, q7_journal_perc, q7_journal_count, q9_labels, q11_labels, q13_labels, q13_journal_count, q13_journal_perc, file=file.path(write_output_path, "reproduc_data.rda"))
 
-
+print('===========================================================')
+print('Done. Next execuate the 03_reproduc_figs.R file') 
+print('===========================================================')
