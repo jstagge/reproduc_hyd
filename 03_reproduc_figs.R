@@ -67,7 +67,7 @@ write_figures_path <- file.path(write_output_base_path, "all_figures")
 dir.create(write_figures_path, recursive=TRUE, showWarnings = FALSE)
 
 ### Set up output folders
-write_pub_path <- file.path(write_output_base_path, "publication")
+write_pub_path <- file.path(write_output_base_path, "publication_figures")
 dir.create(write_pub_path, recursive=TRUE, showWarnings = FALSE)
 
 ###########################################################################

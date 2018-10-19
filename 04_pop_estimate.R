@@ -269,7 +269,7 @@ paper_summary_all_sims <- paper_all_sims%>%
 
 #p <- ggplot(paper_summary_all_sims, aes(x = final_determ, group=Q2_abbrev, colour=Q2_abbrev)) + geom_errorbar(aes(ymin = ll, ymax = ul), position = position_dodge(width = 0.5), size=2) + theme_classic_new(9.5) + scale_colour_manual(values=c(journal_colors,"black"))
 #p
-#p + coord_flip() + scale_x_discrete(limits = rev(levels(yup_summary$final_determ))) 
+#p + coord_flip() + scale_x_discrete(limits = rev(levels(paper_summary_all_sims$final_determ))) 
 
 # p <- ggplot(paper_summary_all_sims, aes(x = final_determ, group=Q2_abbrev, colour=Q2_abbrev)) + geom_pointrange(aes(y=median, ymin = ll, ymax = ul), position = position_dodge(width = 0.5), size=1) + theme_classic() + scale_colour_manual(values=c(journal_colors,"black"))
 #p
@@ -309,7 +309,7 @@ p <- ggplot(paper_summary_all_sims, aes(x = final_determ, group=Q2_abbrev, colou
 	+ theme_classic_new(10) %>%
 	+ scale_colour_manual(name="Journal", values=c(journal_colors,"black")) %>%
 	+ coord_flip() %>%
-	+ scale_x_discrete(name="Reproducibility Level", limits = rev(levels(yup_summary$final_determ)), labels=rev(plot_labels)) %>%
+	+ scale_x_discrete(name="Reproducibility Level", limits = rev(levels(paper_summary_all_sims$final_determ)), labels=rev(plot_labels)) %>%
 	+ scale_y_continuous(name="Estimated Proportion)", labels = scales::percent, expand = c(0, 0), limits = c(0, .7)) %>%
 	+ theme(legend.position = c(0.87, 0.2))
 
