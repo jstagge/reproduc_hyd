@@ -1,6 +1,6 @@
 # Reproducibility in Hydrology
 
-[![DOI](https://zenodo.org/badge/DOI/.svg)](https://doi.org/)
+[![DOI](https://zenodo.org/badge/153355527.svg)](https://zenodo.org/badge/latestdoi/153355527)
 
 This repository contains code associated with paper, entitled, 'A novel replicability survey tool to measure and promote reproducibility in hydrology'. When run, it will replicate the results published in [Stagge et al. 2018](). It is provided here for transparency and so that other users may benefit from its underlying code. Please cite both the paper and this repository if you make use of any part of this.
 
@@ -80,7 +80,7 @@ For any description of this methodology, please use the following citation (s):
 
 * Stagge, J.H., Rosenberg, D.E., Abdallah, A., Akbar, A., Attallah, N., and James, R. (In review) "A novel replicability survey tool to measure and promote reproducibility in hydrology." Scientific Data.
 
-* Stagge, J.H. (2018) "Reproducibility analysis repository accompanying Stagge et al. (2018)." doi: ????????.
+* Stagge, J.H. (2018) "Reproducibility analysis repository accompanying Stagge et al. (2018)." doi: 10.5281/zenodo.1467418
 
 ## Authors
 
