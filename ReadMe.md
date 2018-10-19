@@ -8,7 +8,7 @@ This repository contains code associated with paper, entitled, 'A novel replicab
 The survey flowchart, the online live survey, and the survey form are availabe [here](https://github.com/jstagge/reproduc_hyd/blob/master/assets/Survey_files.md)   
 
 <div style="text-align:center">
-<img src="https://github.com/jstagge/reproduc_hyd/blob/master/assets/Reproducibility_FlowChart.png" alt="Reproducibility survey flow chart" width="500" height="600">
+<img src="https://github.com/jstagge/reproduc_hyd/blob/master/assets/Reproducibility_FlowChart.png" alt="Reproducibility survey flow chart" height="300">
 </div>
 
 ## Getting Started
