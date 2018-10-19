@@ -15,7 +15,9 @@
 ###########################################################################
 ### Path for Data and Output	
 data_path <- "./data"
+Reported_result_path <- "./Replicated_Figs_paper"
 output_path <- "./output"
+
 global_path <- "./global_func"
 function_path <- "./functions"
 
@@ -23,6 +25,11 @@ function_path <- "./functions"
 write_output_base_path <- output_path
 
 dir.create(write_output_base_path)
+
+write_output_path <- file.path(Reported_result_path)
+dir.create(write_output_path, recursive=TRUE)
+
+write_output_base_path <- output_path
 
 
 ###########################################################################
@@ -480,6 +487,22 @@ plot_Q5_6$Q5_6 <- factor(plot_Q5_6$Q5_6, levels=rev(levels(plot_Q5_6$Q5_6)))
 ggsave(file.path(write_output_path, "q5_q6_combined_byavail_bar.png"), p,  width=5.5, height=4, dpi=600)
 ggsave(file.path(write_output_path, "q5_q6_combined_byavail_bar.svg"), p,  width=5.5, height=4)
 ggsave(file.path(write_output_path, "q5_q6_combined_byavail_bar.pdf"), p,  width=5.5, height=4)
+
+
+
+###############################################################################
+# Replicated Figure 2
+write_output_path <- file.path(Reported_result_path)
+dir.create(write_output_path, recursive=TRUE)
+
+ggsave(file.path(Reported_result_path, "Figure3_Avaialbility"), p,  width=5.5, height=4, dpi=600)
+
+
+
+
+############################
+
+write_output_path <- file.path(output_path)
 
 
   p <- ggplot(data = plot_Q5_6, aes(x = Q5_6, y = prop_by_journal, fill = Q2_abbrev)) 
@@ -1003,9 +1026,25 @@ plot( river, default_style= style , yscale=1, fix.pdf=TRUE)
 dev.off()
 
 
+
 ### Output to csv
 write.csv(paper_edges, file.path(write_output_path, "paper_edges.csv"))
 write.csv(paper_nodes, file.path(write_output_path, "paper_nodes.csv"))
+
+
+###############################################################################
+# Replicated Figure 2
+
+write_output_path <- file.path(Reported_result_path)
+dir.create(write_output_path, recursive=TRUE)
+
+
+river_file <- file.path(write_output_path, "Figure2_riverplot")
+
+png(paste0(river_file, '.png'), width = 13, height = 9, units = 'in', res = 300)
+plot( river, default_style= style , yscale=1, fix.pdf=TRUE)
+dev.off()
+
 
 
 ################################
