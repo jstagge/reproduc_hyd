@@ -12,7 +12,7 @@ The survey flowchart, the online live survey, and the survey form are availabe [
 
 Choose an option
 
-### Option 1 Run code live in the cloud with no prerequisites
+### Option 1: Run code live in the cloud with no prerequisites
 
 Click at this badge to execute the analysis and replicate results using R-Studio in the cloud without needing to install R or its dependencies on your local machine.    
 RStudio: [![Binder](http://mybinder.org/badge.svg)](http://mybinder.org/v2/gh/jstagge/reproduc_hyd/master?urlpath=rstudio)
@@ -89,7 +89,7 @@ For any description of this methodology, please use the following citation (s):
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE) file for details
 
 ## Acknowledgments   
 This material is based upon work supported by Utah Mineral Lease Funds, the National Science Foundation, funded through OIA – 1208732, and the U.S. Fullbright Program. Any opinions, findings, and conclusions or recommendations expressed in this material are those of the author(s) and do not necessarily reflect the views of any of the funding organizations. The authors thank Amber S Jones for providing feedback on an early draft and Ayman Alafifi for participation in early discussions to develop the survey tool.
