@@ -1,69 +1,39 @@
 # *------------------------------------------------------------------
-# | PROGRAM NAME: 03_ap_model_fit
-# | FILE NAME: 03_ap_model_fit.R
+# | PROGRAM NAME: 01_article_analysis
+# | FILE NAME: 01_article_analysis.R
 # | DATE: 
 # | CREATED BY:  Jim Stagge         
 # *----------------------------------------------------------------
-# | PURPOSE:  This is a code wrapper to fit the Annual Percentile (AP) model.
-# | It fits cumulative probability distributions for annual and monthly flows.
-# |
-# |
-# *------------------------------------------------------------------
-# | COMMENTS:               
-# |
-# |  1:  
-# |  2: 
-# |  3: 
-# |*------------------------------------------------------------------
-# | DATA USED:               
-# | USGS gauge flow data
-# | Annual reconstructions from:
-# | Allen, E.B., Rittenour, T.M., DeRose, R.J., Bekker, M.F., Kjelgren, R., Buckley, B.M., 2013. A tree-ring based reconstruction of Logan River streamflow, northern Utah. Water Resources Research 49, 8579–8588. doi:10.1002/2013WR014273.
-# |
-# | DeRose, R.J., Bekker, M.F., Wang, S.Y., Buckley, B.M., Kjelgren, R.K., Bardsley, T., Rittenour, T.M., Allen, E.B., 2015. A millennium-length reconstruction of Bear River stream flow, Utah. Journal of Hydrology 529, Part 2, 524–534. doi:10.1016/j.jhydrol.2015.01.014.
-# |
-# |*------------------------------------------------------------------
-# | CONTENTS:               
-# |
-# |  PART 1:  
-# |  PART 2: 
-# |  PART 3: 
-# *-----------------------------------------------------------------
-# | UPDATES:               
-# |
+# | PURPOSE:  This code processes all articles from 2017, plots their keywords,
+# | separates the keyword or non-keyword papers, and randomly assigns to reviewers.
+# | This code will randomly assign papers, so it will not exactly reproduce
+# | results from Stagge et al. (2018)
 # |
 # *------------------------------------------------------------------
-
-### Clear any existing data or functions.
-rm(list=ls())
 
 ###########################################################################
 ## Set the Paths
 ###########################################################################
 ### Path for Data and Output	
-data_path <- "../../data"
-output_path <- "../../output"
-global_path <- "../global_func"
+data_path <- "./data"
+output_path <- "./output"
+global_path <- "./global_func"
 function_path <- "./functions"
 
 ### Set output location
-output_name <- "reproduc"
-write_output_base_path <- file.path(output_path, output_name)
+write_output_base_path <- output_path
 
 dir.create(write_output_base_path)
-
-### Set input location
-data_path<- file.path(data_path, "reproduc")
 
 ###########################################################################
 ###  Load functions
 ###########################################################################
 ### Load these functions for all code
-require(colorout)
+#require(colorout)
 require(assertthat)
 require(staggefuncs)
 require(tidyverse)
-require(colorblindr)
+#require(colorblindr)
 
 ### Load these functions for this unique project
 require(stringr)
@@ -94,9 +64,8 @@ wrr_df <- read.csv(file.path(data_path, "articles/wrr_2017.csv"))
 all_journals_df <- rbind(ems_df, hess_df, jawra_df, joh_df, jwrpm_df, wrr_df)
 journal_names <- levels(all_journals_df$Publication.Title)
 
-
 ###########################################################################
-## Read through all tags and create a table
+## Initial analysis - read through all tags and create a table showing tag frequency
 ###########################################################################
 for (i in seq(1, length(journal_names))){
 
@@ -126,16 +95,19 @@ tag_test <- tags_table$Var1[tags_table$Freq > 250]
 
 tag_sort <- tags_table$Var1[order(tags_table$Freq, decreasing=TRUE)]
 
-
 #12,976 total tags
-
 
 ###########################################################################
 ## Plot tags frequency
 ###########################################################################
+### Create output path
+write_output_path <- file.path(write_output_base_path, "article_analysis")
+dir.create(write_output_path)
 
+### Set journal colors
 journal_colors <- cb_pal(6)
 
+### Plot first 40 tags
 plot_df <- tags_by_journal[tags_by_journal$tags %in% tag_sort[1:40],]
 plot_df$tags <- factor(plot_df$tags, levels=tag_sort)
 
@@ -147,10 +119,10 @@ p <- p + theme(legend.position="bottom")
 p <- p + theme(axis.text.x = element_text(angle = 70, hjust = 1))
 p
 
-ggsave("tags_1-40.pdf",  p, width=8, height=5)
+ggsave(file.path(write_output_path,"tags_1-40.pdf"),  p, width=8, height=5)
 
 
-
+### Plot next 40 tags
 plot_df <- tags_by_journal[tags_by_journal$tags %in% tag_sort[41:80],]
 plot_df$tags <- factor(plot_df$tags, levels=tag_sort)
 
@@ -162,10 +134,10 @@ p <- p + theme(legend.position="bottom")
 p <- p + theme(axis.text.x = element_text(angle = 70, hjust = 1))
 p
 
-ggsave("tags_41-80.pdf",  p, width=8, height=5)
+ggsave(file.path(write_output_path,"tags_41-80.pdf"),  p, width=8, height=5)
 
 
-
+### Plot next 40 tags
 plot_df <- tags_by_journal[tags_by_journal$tags %in% tag_sort[81:120],]
 plot_df$tags <- factor(plot_df$tags, levels=tag_sort)
 
@@ -177,47 +149,27 @@ p <- p + theme(legend.position="bottom")
 p <- p + theme(axis.text.x = element_text(angle = 70, hjust = 1))
 p
 
-ggsave("tags_81-120.pdf",  p, width=8, height=5)
+ggsave(file.path(write_output_path,"tags_81-120.pdf"),  p, width=8, height=5)
 
-
-#strsplit(as.character(ems_tags[[10]]), split="; ")
-
-#all_journals_df[ grep("algorithm", as.character(all_journals_df$Manual.Tags)),]
-
-#all_journals_df[ grep('software', as.character(all_journals_df$Manual.Tags)),]
-
-#yup <- gsub("[[:space:]]", "", as.character(all_journals_df$Manual.Tags))
-#yup <- tolower(yup)
-
-#all_journals_df[grep('analyticalsoftware', yup),]
-
-#all_journals_df$Abstract.Note
-
-#grep('github', as.character(all_journals_df$Abstract.Note))
- 
-#yup <- tolower(as.character(all_journals_df$Abstract.Note))
-#yup <- gsub("[[:space:]]", "", yup)
-#all_journals_df[grep('opensource', yup),]
-
-  
-#############################################################################
-# as.character(all_journals_df$Manual.Tags)
-# "software",
 
 ###########################################################################
-## Redo the whole analysis with something else (come back and check)
+## Choose keywords manually by looking through previous tags for reproducibility terms
 ###########################################################################
 #### Set an index column to use for all calculations
 all_journals_df$index <- seq(1,dim(all_journals_df)[1])
- 
+
+### Name keywords
 term_list <- c("analyticalsoftware", "applicationprograms", "c(programminglanguage)", "c\\+", "cloudcomputing", "computationalreproducibility", "computermodeling", "computerprogramming", "computersoftware", "computersoftwarereusability", "computer-basedmodels", "developmentandtesting", "engineeringsoftware", "fortran", "freelyavailabledata","freelyavailablesoftware", "github", "hardwareandsoftware", "java", "opencode", "opensource", "replicativevalidation", "scientificsoftware", "code", "python", "cran", "http")
 
 abstract_list <- tolower(as.character(all_journals_df$Abstract.Note))
 abstract_list <- gsub("[[:space:]]", "", abstract_list)
 
+### Create list of all tags
 keyword_list <- tolower(as.character(all_journals_df$Manual.Tags))
 keyword_list <- gsub("[[:space:]]", "", keyword_list)
 
+### Loop through each term counting the number of articles with each word in either the keyword or abstract
+### Save the index number of each article with keywords to retrieve later
 for (i in seq(1,length(term_list))){
 	term_i <- term_list[i]
 	
@@ -242,10 +194,13 @@ for (i in seq(1,length(term_list))){
 
 	length_all <- length(index_all)
 
-
+### Frequency table for keywords
 results_df
+
+### Report number of articles with keywords
 length_all
 
+### Report index of articles with keywords
 index_all
 
 
@@ -260,8 +215,6 @@ nonkeyword_subset <- all_journals_df[nonkeyword_index,]
 ###########################################################################
 ## Summarize based on keywords and journal
 ###########################################################################
-#table(keyword_subset$Publication.Title)
-#table(nonkeyword_subset$Publication.Title)
 
 pub_table <- cbind(table(keyword_subset$Publication.Title),
 table(nonkeyword_subset$Publication.Title), table(all_journals_df$Publication.Title))
@@ -276,35 +229,45 @@ pub_table$journal_abbrev <- c("EM&S", "HESS", "JAWRA", "JoH", "JWRP&M", "WRR" )
 ###########################################################################
 ## Write publication summary table
 ###########################################################################
-dir.create(file.path(write_output_base_path, "articles/"))
+### View keyword table on screen
+pub_table
 
-write_file <- file.path(write_output_base_path, "articles/pub_summary_table.csv")
+### Save to CSV file
+write_file <- file.path(write_output_path, "pub_summary_table.csv")
 write.csv(pub_table, write_file)
-
   
 ###########################################################################
 ## Prepare to randomly sample
 ###########################################################################
-
+### Estimate how many papers would be sampled per journal if sampling was proportional and n equal 360
 common_ratio_est <- round((pub_table[,4]/sum(pub_table[,4]))*360)
+names(common_ratio_est) <- pub_table$journal
 common_ratio_est
 
+### Manually modify the ratios to ensure at least 30 articles and at least 15 non-keywords
 corrected_ratio_est <- common_ratio_est
 corrected_ratio_est[1] <- 49+15 #49 in keywords, make sure at least 15 random
 corrected_ratio_est[3] <- 30  ### Minimum of 30 articles
 corrected_ratio_est[5] <- 30  ### Minimum of 30 articles
+
+### Print the resulting number of articles and the overage (more than 360)
 sum(corrected_ratio_est)
 corrected_ratio_est
 360 - sum(corrected_ratio_est)
 
+### Manually reduce the non-modified journals to produce exactly 360 sampled articles
 corrected_ratio_est[2] <- corrected_ratio_est[2] - 8
 corrected_ratio_est[4] <- corrected_ratio_est[4] - 18
 corrected_ratio_est[6] <- corrected_ratio_est[6] - 15
 
+### Double check the corrected proportions equal 360
 sum(corrected_ratio_est)
 
+### Calculate the number of non-keyword papers by subtracting 
 required_nonkeyword <- corrected_ratio_est - pub_table[,2]
 
+
+### Randomly sample Non-Keyword papers, save the index number for each article
 for (j in seq(1,length(required_nonkeyword))){
 	
 	 pub_test <- nonkeyword_subset$Publication.Title %in% names(required_nonkeyword)[j]
@@ -322,20 +285,37 @@ for (j in seq(1,length(required_nonkeyword))){
 	
 sample_nonkeyword <- sort(sample_nonkeyword)
 
+  
+###########################################################################
+## Output random sample indices
+###########################################################################
+### Reminder that these files will be saved in a separate github folder because they do not match
+### exactly with the randomly sampled articles in the paper
+### Create output path
+write_output_path <- file.path(write_output_base_path, "article_analysis_github")
+dir.create(write_output_path)
 
-write.csv( index_all, "sampled_keywords.csv")
-write.csv( sample_nonkeyword, "sampled_nonkeywords.csv")
+### Output indices of keyword papers
+write.csv( index_all, file.path(write_output_path,"sampled_keywords_github.csv"))
+### Output indices of non-keyword papers
+write.csv( sample_nonkeyword, file.path(write_output_path,"sampled_nonkeywords_github.csv"))
 
+### Combine and output indices of all sampled papers
 sampled_indices <- c(index_all, sample_nonkeyword)
-write.csv( sampled_indices, "sampled_indices.csv")
+write.csv( sampled_indices, file.path(write_output_path,"sampled_indices_github.csv"))
 
+
+###########################################################################
+## Output random sample indices
+###########################################################################
 ### Assign reviewers
-reviewers <- c("Adel", "David","Hadia", "Jim", "Nour", "Ryan")
+reviewers <- c("Reviewer1", "Reviewer2","Reviewer3", "Reviewer4", "Reviewer5", "Reviewer6")
 
 ### Randomly sorted publications
 random_indices <- sample(sampled_indices)
 
-
+### Randomly assign 60 papers to each of 6 reviewers (360 papers)
+### Create a CSV spreadsheet to provide citation information to reviewers
 paper_assign <- data.frame(Reviewer=rep(reviewers, each=60))
 paper_assign$index <- random_indices
 paper_assign$DOI <- all_journals_df$DOI[random_indices]
@@ -345,6 +325,7 @@ paper_assign$Journal <- as.character(all_journals_df$Publication.Title[random_in
 
 paper_assign <- with(paper_assign, paper_assign[order(Reviewer, index),])
 
-write.csv(paper_assign, "paper_assign_github.csv", row.names=FALSE)
+### Output paper assignments
+write.csv(paper_assign, file.path(write_output_path,"paper_assign_github.csv"), row.names=FALSE)
 
 

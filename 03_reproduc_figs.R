@@ -1,69 +1,39 @@
 # *------------------------------------------------------------------
-# | PROGRAM NAME: 03_ap_model_fit
-# | FILE NAME: 03_ap_model_fit.R
+# | PROGRAM NAME: 03_reproduc_figs
+# | FILE NAME: 03_reproduc_figs.R
 # | DATE: 
 # | CREATED BY:  Jim Stagge         
 # *----------------------------------------------------------------
-# | PURPOSE:  This is a code wrapper to fit the Annual Percentile (AP) model.
-# | It fits cumulative probability distributions for annual and monthly flows.
-# |
-# |
-# *------------------------------------------------------------------
-# | COMMENTS:               
-# |
-# |  1:  
-# |  2: 
-# |  3: 
-# |*------------------------------------------------------------------
-# | DATA USED:               
-# | USGS gauge flow data
-# | Annual reconstructions from:
-# | Allen, E.B., Rittenour, T.M., DeRose, R.J., Bekker, M.F., Kjelgren, R., Buckley, B.M., 2013. A tree-ring based reconstruction of Logan River streamflow, northern Utah. Water Resources Research 49, 8579–8588. doi:10.1002/2013WR014273.
-# |
-# | DeRose, R.J., Bekker, M.F., Wang, S.Y., Buckley, B.M., Kjelgren, R.K., Bardsley, T., Rittenour, T.M., Allen, E.B., 2015. A millennium-length reconstruction of Bear River stream flow, Utah. Journal of Hydrology 529, Part 2, 524–534. doi:10.1016/j.jhydrol.2015.01.014.
-# |
-# |*------------------------------------------------------------------
-# | CONTENTS:               
-# |
-# |  PART 1:  
-# |  PART 2: 
-# |  PART 3: 
-# *-----------------------------------------------------------------
-# | UPDATES:               
-# |
+# | PURPOSE:  This code generates all figures based on data from 
+# | 02_reproduc_data_handling
+# | 
 # |
 # *------------------------------------------------------------------
-
-### Clear any existing data or functions.
-rm(list=ls())
 
 ###########################################################################
 ## Set the Paths
 ###########################################################################
 ### Path for Data and Output	
-data_path <- "../../data"
-output_path <- "../../output"
-global_path <- "../global_func"
+data_path <- "./data"
+output_path <- "./output"
+global_path <- "./global_func"
 function_path <- "./functions"
 
 ### Set output location
-output_name <- "reproduc"
-write_output_base_path <- file.path(output_path, output_name)
+write_output_base_path <- output_path
 
 dir.create(write_output_base_path)
 
-### Set input location
-data_path<- file.path(data_path, "reproduc")
 
 ###########################################################################
 ###  Load functions
 ###########################################################################
 ### Load these functions for all code
-require(colorout)
+#require(colorout)
 require(assertthat)
 require(staggefuncs)
 require(tidyverse)
-require(colorblindr)
+#require(colorblindr)
 
 ### Load these functions for this unique project
 require(stringr)
@@ -82,35 +52,28 @@ sapply(file.path(function_path, file.sources),source)
 file.sources = list.files(global_path, pattern="*.R", recursive=TRUE)
 sapply(file.path(global_path, file.sources),source)
 
-
-
 ###########################################################################
 ## Set Initial Values
 ###########################################################################
 ### Order modified for clarity
 journal_abbrev <- c("EM&S", "HESS", "WRR", "JoH", "JAWRA", "JWRP&M")
 journal_colors <- cb_pal("custom", n=6, sort=FALSE)
-#journal_colors <- journal_colors[c(1, 2, 4, 3, 5, 6)]
-#journal_colors <- journal_colors[c(4, 2, 1, 3, 5, 6)]
-
 
 ###########################################################################
 ## Set Additional Output Folders
 ###########################################################################
 ### Set up output folders
 write_figures_path <- file.path(write_output_base_path, "figures")
-dir.create(file.path(write_figures_path,"png"), recursive=TRUE)
-dir.create(file.path(write_figures_path,"pdf"), recursive=TRUE)
-dir.create(file.path(write_figures_path,"svg"), recursive=TRUE)
+dir.create(write_figures_path, recursive=TRUE)
 
-
+### Set up output folders
+write_pub_path <- file.path(write_figures_path, "publication")
+dir.create(write_figures_path, recursive=TRUE)
 
 ###########################################################################
 ## Load data
 ###########################################################################
-load(file=file.path(write_output_base_path, "reproduc_data.rda"))
-
-
+load(file=file.path(write_output_base_path, "survey_analysis/reproduc_data.rda"))
 
 ###########################################################################
 ## Create column with availability / reproducibility testing
@@ -129,6 +92,11 @@ reproduc_df$Q2_abbrev <- factor(reproduc_df$Q2_abbrev, levels=c("EM&S", "HESS", 
 ###########################################################################
 ###  Plot keywords by Journal
 ###########################################################################
+### Set up output folders
+write_output_path <- file.path(write_figures_path, "articles")
+dir.create(write_output_path, recursive=TRUE)
+
+### Summarize articles sampled
 plot_articles_sample <- reproduc_df %>%
 	filter(rep_avail_clean == "avail") %>%
  	select(keyword, Q2_abbrev) %>%
@@ -156,9 +124,9 @@ plot_articles_sample_spread$labels <- paste0(plot_articles_sample_spread$Keyword
   p 
   
 ### Save figure
-ggsave(paste0(file.path(write_figures_path,"png/"), "article_sample_keyword_by_journal", "_bw.png"), p, width=5, height=3, dpi=600)
-ggsave(paste0(file.path(write_figures_path,"svg/"), "article_sample_keyword_by_journal", "_bw.svg"), p, width=5, height=3)
-ggsave(paste0(file.path(write_figures_path,"pdf/"), "article_sample_keyword_by_journal", "_bw.pdf"), p, width=5, height=3)
+ggsave(file.path(write_output_path, "article_sample_keyword_by_journal_bw.png"), p, width=5, height=3, dpi=600)
+ggsave(file.path(write_output_path, "article_sample_keyword_by_journal_bw.svg"), p, width=5, height=3)
+ggsave(file.path(write_output_path, "article_sample_keyword_by_journal_bw.pdf"), p, width=5, height=3)
 
 	
 plot_articles_sample$fill <- paste0(plot_articles_sample$Q2_abbrev, "--", plot_articles_sample$keyword)
@@ -177,13 +145,13 @@ journal_colors_black
   p <- p + theme_classic_new(9.5) +   theme(legend.position="none")
   p 
    
-  cvd_grid(p)
+### Check color-deficient
+#cvd_grid(p)
 
 ### Save figure
-ggsave(paste0(file.path(write_figures_path,"png/"), "article_sample_keyword_by_journal", "_color.png"), p, width=5, height=3, dpi=600)
-ggsave(paste0(file.path(write_figures_path,"svg/"), "article_sample_keyword_by_journal", "_color.svg"), p, width=5, height=3)
-ggsave(paste0(file.path(write_figures_path,"pdf/"), "article_sample_keyword_by_journal", "_color.pdf"), p, width=5, height=3)
-
+ggsave(file.path(write_output_path, "article_sample_keyword_by_journal_color.png"), p, width=5, height=3, dpi=600)
+ggsave(file.path(write_output_path, "article_sample_keyword_by_journal_color.svg"), p, width=5, height=3)
+ggsave(file.path(write_output_path, "article_sample_keyword_by_journal_color.pdf"), p, width=5, height=3)
 
 ###########################################################################
 ## Plot population papers by keyword
@@ -210,11 +178,11 @@ plot_articles_population$keyword[plot_articles_population$keyword == "none"] <- 
   p <- p + scale_fill_manual(name="Keyword", values=c("grey20", "grey70"))
   p <- p + theme_classic_new(9.5) +   theme(legend.position="bottom")
   p 
-  
+
 ### Save figure
-ggsave(paste0(file.path(write_figures_path,"png/"), "article_keyword_by_journal", "_bw.png"), p, width=5, height=3, dpi=600)
-ggsave(paste0(file.path(write_figures_path,"svg/"), "article_keyword_by_journal", "_bw.svg"), p, width=5, height=3)
-ggsave(paste0(file.path(write_figures_path,"pdf/"), "article_keyword_by_journal", "_bw.pdf"), p, width=5, height=3)
+ggsave(file.path(write_output_path, "article_keyword_by_journal_bw.png"), p, width=5, height=3, dpi=600)
+ggsave(file.path(write_output_path, "article_keyword_by_journal_bw.svg"), p, width=5, height=3)
+ggsave(file.path(write_output_path, "article_keyword_by_journal_bw.pdf"), p, width=5, height=3)
 
 
 plot_articles_population$fill <- paste0(plot_articles_population$journal_abbrev, "--", plot_articles_population$keyword)
@@ -234,12 +202,12 @@ journal_colors_black
   p <- p + theme_classic_new(9.5) +   theme(legend.position="none")
   p 
 
-  cvd_grid(p)
+  #cvd_grid(p)
 
 ### Save figure
-ggsave(paste0(file.path(write_figures_path,"png/"), "article_keyword_by_journal", "_color.png"), p, width=5, height=3, dpi=600)
-ggsave(paste0(file.path(write_figures_path,"svg/"), "article_keyword_by_journal", "_color.svg"), p, width=5, height=3)
-ggsave(paste0(file.path(write_figures_path,"pdf/"), "article_keyword_by_journal", "_color.pdf"), p, width=5, height=3)
+ggsave(file.path(write_output_path, "article_keyword_by_journal_color.png"), p, width=5, height=3, dpi=600)
+ggsave(file.path(write_output_path, "article_keyword_by_journal_color.svg"), p, width=5, height=3)
+ggsave(file.path(write_output_path, "article_keyword_by_journal_color.pdf"), p, width=5, height=3)
 
 
 ###########################################################################
@@ -302,11 +270,11 @@ journal_colors_black
   p 
 
 ### Save figure
-ggsave(paste0(file.path(write_figures_path,"png/"), "article_keyword_by_journal_combined", "_color.png"), p, width=5.5, height=3.5, dpi=600)
-ggsave(paste0(file.path(write_figures_path,"svg/"), "article_keyword_by_journal_combined", "_color.svg"), p, width=5.5, height=3.5)
-ggsave(paste0(file.path(write_figures_path,"pdf/"), "article_keyword_by_journal_combined", "_color.pdf"), p, width=5.5, height=3.5)
+ggsave(file.path(write_output_path, "article_keyword_by_journal_combined_color.png"), p, width=5.5, height=3.5, dpi=600)
+ggsave(file.path(write_output_path, "article_keyword_by_journal_combined_color.svg"), p, width=5.5, height=3.5)
+ggsave(file.path(write_output_path, "article_keyword_by_journal_combined_color.pdf"), p, width=5.5, height=3.5)
 
-cvd_grid(p)
+#cvd_grid(p)
 
 
 
@@ -328,13 +296,18 @@ journal_colors_black
   p 
 
 ### Save figure
-ggsave(paste0(file.path(write_figures_path,"png/"), "article_keyword_by_journal_combined", "_bw.png"), p, width=5.5, height=3.5, dpi=600)
-ggsave(paste0(file.path(write_figures_path,"svg/"), "article_keyword_by_journal_combined", "_bw.svg"), p, width=5.5, height=3.5)
-ggsave(paste0(file.path(write_figures_path,"pdf/"), "article_keyword_by_journal_combined", "_bw.pdf"), p, width=5.5, height=3.5)
+ggsave(file.path(write_output_path, "article_keyword_by_journal_combined_bw.png"), p, width=5.5, height=3.5, dpi=600)
+ggsave(file.path(write_output_path, "article_keyword_by_journal_combined_bw.svg"), p, width=5.5, height=3.5)
+ggsave(file.path(write_output_path, "article_keyword_by_journal_combined_bw.pdf"), p, width=5.5, height=3.5)
+
 
 ###########################################################################
-###  Plot Availability claim
+###  Plot Stated Availability  (Q5)
 ###########################################################################
+### Set up output folders
+write_output_path <- file.path(write_figures_path, "availability")
+dir.create(write_output_path, recursive=TRUE)
+
 
 avail_journal <- reproduc_df %>% 
 	filter(rep_avail_clean == "avail") %>%
@@ -354,72 +327,57 @@ avail_journal$Q5_leading <- factor(avail_journal$Q5, levels=levels(avail_journal
   p <- p + geom_bar(stat = 'identity', width=0.8, position = position_dodge(width=0.8))
   p <- p + scale_y_continuous(name="Proportion of Articles", labels = scales::percent, expand = c(0, 0), limits = c(0, 1))
   p <- p + scale_x_discrete(name="Journal")
-  p <- p + scale_fill_manual(name="Availability claim", values=cb_pal("custom", n=3, sort=FALSE), limits=levels(avail_journal$Q5_leading)) 
+  p <- p + scale_fill_manual(name="Stated Availability (Q5)", values=cb_pal("custom", n=3, sort=FALSE), limits=levels(avail_journal$Q5_leading)) 
   p <- p + theme_classic_new(9.5) +   theme(legend.position="bottom")
   p 
   
-  cvd_grid(p)
+#cvd_grid(p)
 
 ### Save figure
-ggsave(paste0(file.path(write_figures_path,"png/"), "avail_claim_by_journal", "_colors.png"), p, width=5, height=3.25, dpi=600)
-ggsave(paste0(file.path(write_figures_path,"svg/"), "avail_claim_by_journal", "_colors.svg"), p, width=5, height=3.25)
-ggsave(paste0(file.path(write_figures_path,"pdf/"), "avail_claim_by_journal", "_colors.pdf"), p, width=5, height=3.25)
+ggsave(file.path(write_output_path, "q5_colors.png"), p, width=5, height=3.25, dpi=600)
+ggsave(file.path(write_output_path, "q5_colors.svg"), p, width=5, height=3.25)
+ggsave(file.path(write_output_path, "q5_colors.pdf"), p, width=5, height=3.25)
 
-p <- p + scale_fill_manual(name="Availability claim", values=c("#66c2a5", "#8da0cb", "#fc8d62"), limits=levels(avail_journal$Q5_leading)) 
+### Alternative colors
+#p <- p + scale_fill_manual(name="Stated Availability (Q5)", values=c("#66c2a5", "#8da0cb", "#fc8d62"), limits=levels(avail_journal$Q5_leading)) 
+#p <- p + scale_fill_manual(name="Stated Availability (Q5)", values=cb_pal("wong", n=3, sort=FALSE)[c(3, 2, 1)], limits=levels(avail_journal$Q5_leading)) 
+
+p <- p + scale_fill_manual(name="Stated Availability (Q5)", values=c("grey10", "grey40", "grey80"), limits=levels(avail_journal$Q5_leading)) 
 ### Save figure
-ggsave(paste0(file.path(write_figures_path,"png/"), "avail_claim_by_journal", "_colors2.png"), p, width=5, height=3.25, dpi=600)
-ggsave(paste0(file.path(write_figures_path,"svg/"), "avail_claim_by_journal", "_colors2.svg"), p, width=5, height=3.25)
-ggsave(paste0(file.path(write_figures_path,"pdf/"), "avail_claim_by_journal", "_colors2.pdf"), p, width=5, height=3.25)
- 
-p <- p + scale_fill_manual(name="Availability claim", values=cb_pal("wong", n=3, sort=FALSE)[c(3, 2, 1)], limits=levels(avail_journal$Q5_leading)) 
-### Save figure
-ggsave(paste0(file.path(write_figures_path,"png/"), "avail_claim_by_journal", "_colors3.png"), p, width=5, height=3.25, dpi=600)
-ggsave(paste0(file.path(write_figures_path,"svg/"), "avail_claim_by_journal", "_colors3.svg"), p, width=5, height=3.25)
-ggsave(paste0(file.path(write_figures_path,"pdf/"), "avail_claim_by_journal", "_colors3.pdf"), p, width=5, height=3.25)
- 
-p <- p + scale_fill_manual(name="Availability claim", values=c("grey10", "grey40", "grey80"), limits=levels(avail_journal$Q5_leading)) 
-### Save figure
-ggsave(paste0(file.path(write_figures_path,"png/"), "avail_claim_by_journal", "_bw.png"), p, width=5, height=3.25, dpi=600)
-ggsave(paste0(file.path(write_figures_path,"svg/"), "avail_claim_by_journal", "_bw.svg"), p, width=5, height=3.25)
-ggsave(paste0(file.path(write_figures_path,"pdf/"), "avail_claim_by_journal", "_bw.pdf"), p, width=5, height=3.25)
-   
+ggsave(file.path(write_output_path, "q5_bw.png"), p, width=5, height=3.25, dpi=600)
+ggsave(file.path(write_output_path, "q5_bw.svg"), p, width=5, height=3.25)
+ggsave(file.path(write_output_path, "q5_bw.pdf"), p, width=5, height=3.25)
+
 
 ### Plot as stacked bars    	
   p <- ggplot(data = avail_journal, aes(x = Q2_abbrev, y = prop_by_journal, fill = Q5)) 
   p <- p + geom_bar(stat = 'identity', position = 'stack', width=0.7)
   p <- p + scale_y_continuous(name="Proportion of Articles", labels = scales::percent, expand = c(0, 0), limits = c(0, 1))
   p <- p + scale_x_discrete(name="Journal")
-  p <- p + scale_fill_manual(name="Availability claim", values=cb_pal("custom", n=3, sort=FALSE), limits=levels(avail_journal$Q5_leading)) 
+  p <- p + scale_fill_manual(name="Stated Availability (Q5)", values=cb_pal("custom", n=3, sort=FALSE), limits=levels(avail_journal$Q5_leading)) 
   p <- p + theme_classic_new(9.5) +   theme(legend.position="bottom")
   p 
   
-  cvd_grid(p)
+  #cvd_grid(p)
 ### Save figure
-ggsave(paste0(file.path(write_figures_path,"png/"), "avail_claim_by_journal_stack", "_colors.png"), p, width=5, height=3.25, dpi=600)
-ggsave(paste0(file.path(write_figures_path,"svg/"), "avail_claim_by_journal_stack", "_colors.svg"), p, width=5, height=3.25)
-ggsave(paste0(file.path(write_figures_path,"pdf/"), "avail_claim_by_journal_stack", "_colors.pdf"), p, width=5, height=3.25)
+ggsave(file.path(write_output_path, "q5_stack_colors.png"), p, width=5, height=3.25, dpi=600)
+ggsave(file.path(write_output_path, "q5_stack_colors.svg"), p, width=5, height=3.25)
+ggsave(file.path(write_output_path, "q5_stack_colors.pdf"), p, width=5, height=3.25)
 
-p <- p + scale_fill_manual(name="Availability claim", values=c("#66c2a5", "#8da0cb", "#fc8d62"), limits=levels(avail_journal$Q5_leading)) 
-### Save figure
-ggsave(paste0(file.path(write_figures_path,"png/"), "avail_claim_by_journal_stack", "_colors2.png"), p, width=5, height=3.25, dpi=600)
-ggsave(paste0(file.path(write_figures_path,"svg/"), "avail_claim_by_journal_stack", "_colors2.svg"), p, width=5, height=3.25)
-ggsave(paste0(file.path(write_figures_path,"pdf/"), "avail_claim_by_journal_stack", "_colors2.pdf"), p, width=5, height=3.25)
- 
-p <- p + scale_fill_manual(name="Availability claim", values=cb_pal("wong", n=3, sort=FALSE)[c(3, 2, 1)], limits=levels(avail_journal$Q5_leading)) 
-### Save figure
-ggsave(paste0(file.path(write_figures_path,"png/"), "avail_claim_by_journal_stack", "_colors3.png"), p, width=5, height=3.25, dpi=600)
-ggsave(paste0(file.path(write_figures_path,"svg/"), "avail_claim_by_journal_stack", "_colors3.svg"), p, width=5, height=3.25)
-ggsave(paste0(file.path(write_figures_path,"pdf/"), "avail_claim_by_journal_stack", "_colors3.pdf"), p, width=5, height=3.25)
- 
-p <- p + scale_fill_manual(name="Availability claim", values=c("grey10", "grey40", "grey80"), limits=levels(avail_journal$Q5_leading)) 
-### Save figure
-ggsave(paste0(file.path(write_figures_path,"png/"), "avail_claim_by_journal_stack", "_bw.png"), p, width=5, height=3.25, dpi=600)
-ggsave(paste0(file.path(write_figures_path,"svg/"), "avail_claim_by_journal_stack", "_bw.svg"), p, width=5, height=3.25)
-ggsave(paste0(file.path(write_figures_path,"pdf/"), "avail_claim_by_journal_stack", "_bw.pdf"), p, width=5, height=3.25)
+### Alternative colors
+#p <- p + scale_fill_manual(name="Stated Availability (Q5)", values=c("#66c2a5", "#8da0cb", "#fc8d62"), limits=levels(avail_journal$Q5_leading))
+#p <- p + scale_fill_manual(name="Stated Availability (Q5)", values=cb_pal("wong", n=3, sort=FALSE)[c(3, 2, 1)], limits=levels(avail_journal$Q5_leading)) 
 
+
+p <- p + scale_fill_manual(name="Stated Availability (Q5)", values=c("grey10", "grey40", "grey80"), limits=levels(avail_journal$Q5_leading)) 
+ 
+### Save figure
+ggsave(file.path(write_output_path, "q5_stack_bw.png"), p, width=5, height=3.25, dpi=600)
+ggsave(file.path(write_output_path, "q5_stack_bw.svg"), p, width=5, height=3.25)
+ggsave(file.path(write_output_path, "q5_stack_bw.pdf"), p, width=5, height=3.25)
 
 ###########################################################################
-###  Plot Availability Source
+###  Plot Availability Source (Q6)
 ###########################################################################
   	
 plot_q6 <- q6_journal_perc%>%
@@ -431,23 +389,24 @@ plot_q6$source <- factor(plot_q6$source, levels=c("some", "article", "author", "
 p <- ggplot(subset(plot_q6, source != "None"), aes(x=source, y=value, fill=Q2_abbrev)) 
 p <- p + geom_bar(stat = 'identity', width=0.8, position = position_dodge(width=0.8))
 p <- p + scale_y_continuous(name="Proportion of Articles", labels = scales::percent, expand = c(0, 0), limits = c(0, .7))
-p <- p + scale_x_discrete(name="Availability Source")
+p <- p + scale_x_discrete(name="Where Available (Q6)")
 p <- p + scale_fill_manual(name="Journal", values=journal_colors) 
 p <- p + theme_classic_new(9.5) +   theme(legend.position="bottom") + guides(fill = guide_legend(nrow = 1))
 p 	
 
-cvd_grid(p)
+#cvd_grid(p)
 
 ### Save figure
-ggsave(paste0(file.path(write_figures_path,"png/"), "avail_source_by_source", ".png"), p, width=5, height=3.5, dpi=600)
-ggsave(paste0(file.path(write_figures_path,"svg/"), "avail_source_by_source", ".svg"), p, width=5, height=3.5)
-ggsave(paste0(file.path(write_figures_path,"pdf/"), "avail_source_by_source", ".pdf"), p, width=5, height=3.5)
+ggsave(file.path(write_output_path, "q6_by_source.png"), p, width=5, height=3.25, dpi=600)
+ggsave(file.path(write_output_path, "q6_by_source.svg"), p, width=5, height=3.25)
+ggsave(file.path(write_output_path, "q6_by_source.pdf"), p, width=5, height=3.25)
+
 
 p <- ggplot(plot_q6, aes(x=Q2_abbrev, y=value, fill=source))
 p <- p + geom_bar(stat = 'identity', position = position_stack())
 p <- p + scale_y_continuous(name="Proportion of Articles", labels = scales::percent, expand = c(0, 0), limits = c(0, 1.25))
 p <- p + scale_x_discrete(name="Journal")
-p <- p + scale_fill_manual(name="Availability Source", values=cb_pal("wong", n=5, sort=TRUE)) 
+p <- p + scale_fill_manual(name="Where Available (Q6)", values=cb_pal("wong", n=5, sort=TRUE)) 
 p <- p + theme_classic_new(9.5) +   theme(legend.position="bottom")
 p 	
 
@@ -455,20 +414,19 @@ p <- ggplot(subset(plot_q6, source != "None"), aes(x=Q2_abbrev, y=value, fill=so
 p <- p + geom_bar(stat = 'identity', width=0.75, position = position_dodge(width=0.75))
 p <- p + scale_y_continuous(name="Proportion of Articles", labels = scales::percent, expand = c(0, 0), limits = c(0, 0.7))
 p <- p + scale_x_discrete(name="Journal")
-p <- p + scale_fill_manual(name="Availability Source", values=cb_pal("ptol", n=4, sort=TRUE)) 
+p <- p + scale_fill_manual(name="Where Available (Q6)", values=cb_pal("ptol", n=4, sort=TRUE)) 
 p <- p + theme_classic_new(9.5) +   theme(legend.position="bottom")
 p 	
 ### Save figure
-ggsave(paste0(file.path(write_figures_path,"png/"), "avail_source_by_journal", ".png"), p, width=5, height=3.25, dpi=600)
-ggsave(paste0(file.path(write_figures_path,"svg/"), "avail_source_by_journal", ".svg"), p, width=5, height=3.25)
-ggsave(paste0(file.path(write_figures_path,"pdf/"), "avail_source_by_journal", ".pdf"), p, width=5, height=3.25)
+ggsave(file.path(write_output_path, "q6_by_journal.png"), p, width=5, height=3.25, dpi=600)
+ggsave(file.path(write_output_path, "q6_by_journal.svg"), p, width=5, height=3.25)
+ggsave(file.path(write_output_path, "q6_by_journal.pdf"), p, width=5, height=3.25)
 
-p <- p + scale_fill_manual(values=c("grey15", "grey35", "grey60", "grey80"))
+p <- p + scale_fill_manual(name="Where Available (Q6)", values=c("grey15", "grey35", "grey60", "grey80"))
 ### Save figure
-ggsave(paste0(file.path(write_figures_path,"png/"), "avail_source_by_journal", "_bw.png"), p, width=5, height=3.25, dpi=600)
-ggsave(paste0(file.path(write_figures_path,"svg/"), "avail_source_by_journal", "_bw.svg"), p, width=5, height=3.25)
-ggsave(paste0(file.path(write_figures_path,"pdf/"), "avail_source_by_journal", "_bw.pdf"), p, width=5, height=3.25)
-
+ggsave(file.path(write_output_path, "q6_by_journal_bw.png"), p, width=5, height=3.25, dpi=600)
+ggsave(file.path(write_output_path, "q6_by_journal_bw.svg"), p, width=5, height=3.25)
+ggsave(file.path(write_output_path, "q6_by_journal_bw.pdf"), p, width=5, height=3.25)
 
 
 ###########################################################################
@@ -513,33 +471,33 @@ plot_Q5_6$Q5_6 <- factor(plot_Q5_6$Q5_6, levels=rev(levels(plot_Q5_6$Q5_6)))
   p <- p + geom_bar(stat = 'identity', width=0.8, position = position_dodge(width=0.8))
   p <- p + scale_y_continuous(name="Proportion of Articles", labels = scales::percent, expand = c(0, 0), limits = c(0, 0.7))
   p <- p + scale_x_discrete(name="Journal")
-  p <- p + scale_fill_manual(name="Availability claim", values=cb_pal("nature", n=6, sort=FALSE)[c(3, 2, 4, 5, 6, 1)])
+  p <- p + scale_fill_manual(name="Stated Availability", values=cb_pal("nature", n=6, sort=FALSE)[c(3, 2, 4, 5, 1, 6)], breaks= c("Some or All\nAvailable Online", "Only In\nArticle", "Author\nRequest", "Third\nParty", "No availability","Dataless or review"))
   #p <- p + scale_fill_manual(name="Availability claim", values=cb_pal("wong", n=6, sort=TRUE))
    #  p <- p + scale_fill_manual(name="Availability claim", values=c("purple", "red", "darkblue", "blue", "yellow", "green"))
   p <- p + theme_classic_new(9.5) +   theme(legend.position="bottom")
   p <- p + guides(fill = guide_legend(nrow = 2, byrow=TRUE, title.position="top", title.hjust=0))
-   p 
+  p 
 
 ### Save figure
-ggsave(paste0(file.path(write_figures_path,"png/"), "q5_q6_combined_byjournal_bar", "_color.png"), p, width=5.5, height=4, dpi=600)
-ggsave(paste0(file.path(write_figures_path,"svg/"), "q5_q6_combined_byjournal_bar", "_color.svg"), p, width=5.5, height=4)
-ggsave(paste0(file.path(write_figures_path,"pdf/"), "q5_q6_combined_byjournal_bar", "_color.pdf"), p, width=5.5, height=4)
+ggsave(file.path(write_output_path, "q5_q6_combined_byavail_bar.png"), p,  width=5.5, height=4, dpi=600)
+ggsave(file.path(write_output_path, "q5_q6_combined_byavail_bar.svg"), p,  width=5.5, height=4)
+ggsave(file.path(write_output_path, "q5_q6_combined_byavail_bar.pdf"), p,  width=5.5, height=4)
+
 
   p <- ggplot(data = plot_Q5_6, aes(x = Q5_6, y = prop_by_journal, fill = Q2_abbrev)) 
   p <- p + geom_bar(stat = 'identity', width=0.8, position = position_dodge(width=0.8))
   p <- p + scale_y_continuous(name="Proportion of Articles", labels = scales::percent, expand = c(0, 0), limits = c(0, 0.7))
-  p <- p + scale_x_discrete(name="Data Availability")
+  p <- p + scale_x_discrete(name="Stated Availability")
   p <- p + scale_fill_manual(name="Journal", values=journal_colors) 
  # p <- p + scale_fill_manual(name="Availability claim", values=cb_pal("custom", n=3, sort=FALSE), limits=levels(avail_journal$Q5_leading)) 
   p <- p + theme_classic_new(9.5) +   theme(legend.position="bottom")
   p <- p + guides(fill = guide_legend(nrow = 1, byrow=TRUE, title.position="top", title.hjust=0.5))
   p 
 
-##
 # Save figure
-ggsave(paste0(file.path(write_figures_path,"png/"), "q5_q6_combined_byelement_bar", "_color.png"), p, width=5.5, height=4, dpi=600)
-ggsave(paste0(file.path(write_figures_path,"svg/"), "q5_q6_combined_byelement_bar", "_color.svg"), p, width=5.5, height=4)
-ggsave(paste0(file.path(write_figures_path,"pdf/"), "q5_q6_combined_byelement_bar", "_color.pdf"), p, width=5.5, height=4)
+ggsave(file.path(write_output_path, "q5_q6_combined_byjournal_bar.png"), p,  width=5.5, height=4, dpi=600)
+ggsave(file.path(write_output_path, "q5_q6_combined_byjournal_bar.svg"), p,  width=5.5, height=4)
+ggsave(file.path(write_output_path, "q5_q6_combined_byjournal_bar.pdf"), p,  width=5.5, height=4)
 
 
 ### Refactor labels
@@ -551,22 +509,25 @@ plot_Q5_6$Q5_6 <- factor(plot_Q5_6$Q5_6, levels= c("Dataless or review","No avai
   p <- p + scale_y_continuous(name="Proportion of Articles", labels = scales::percent, expand = c(0, 0), limits = c(0, 1))
   p <- p + scale_x_discrete(name="Journal")
   #p <- p + scale_fill_manual(name="Availability claim", values=rev(cb_pal("ptol", n=6, sort=FALSE)[c(3, 6, 1, 2, 5, 4)]))#, limits=levels(avail_journal$Q5_leading)) 
-  p <- p + scale_fill_manual(name="Availability claim", values=rev(cb_pal("nature", n=6, sort=FALSE)[c(3, 2, 4, 5, 1, 6)]))
+  p <- p + scale_fill_manual(name="Stated Availability", values=rev(cb_pal("nature", n=6, sort=FALSE)[c(3, 2, 4, 5, 6, 1)]))
   p <- p + theme_classic_new(9.5) +   theme(legend.position="bottom")
   p <- p + guides(fill = guide_legend(nrow = 2, byrow=TRUE, title.position="top", title.hjust=0, reverse=TRUE))
   p 
   
 ### Save figure
-ggsave(paste0(file.path(write_figures_path,"png/"), "q5_q6_combined_byjournal_stack", "_color.png"), p, width=5.5, height=4, dpi=600)
-ggsave(paste0(file.path(write_figures_path,"svg/"), "q5_q6_combined_byjournal_stack", "_color.svg"), p, width=5.5, height=4)
-ggsave(paste0(file.path(write_figures_path,"pdf/"), "q5_q6_combined_byjournal_stack", "_color.pdf"), p, width=5.5, height=4)
-
+ggsave(file.path(write_output_path, "q5_q6_combined_byavail_stacked.png"), p,  width=5.5, height=4, dpi=600)
+ggsave(file.path(write_output_path, "q5_q6_combined_byavail_stacked.svg"), p,  width=5.5, height=4)
+ggsave(file.path(write_output_path, "q5_q6_combined_byavail_stacked.pdf"), p,  width=5.5, height=4)
 
 
 ###########################################################################
-###  Plot Availability Components
+###  Plot Artifacts (Q7)
 ###########################################################################
-  	
+### Set up output folders
+write_output_path <- file.path(write_figures_path, "artifacts")
+dir.create(write_output_path, recursive=TRUE)
+
+### Create dataframe for Q7
 plot_q7 <- q7_journal_perc%>%
   	 gather(key=source, value=value, -Q2_abbrev) %>%
   	 filter(Q2_abbrev !="Total")
@@ -583,84 +544,85 @@ plot_q7 <- plot_q7 %>%
 #Metadata to describe the code
 #Common file format /instructions to open
 
+### Set up labels for primary and secondary artifacts
 plot_q7$facet <- "Secondary"
-plot_q7$facet[plot_q7$source %in% c("dir", "code", "data")] <- "Required"
+plot_q7$facet[plot_q7$source %in% c("dir", "code", "data")] <- "Primary"
 
-q7_labels <- c("Some Input\ndata", "Code/Model/\nSoftware", "Directions\nto run",  "Hardware/\nSoftware\nRequirements", "Common File\nFormats", "Unique &\nPersistent\nIdentifiers", "Metadata")
+q7_labels <- c("Input\ndata", "Code/Model/\nSoftware", "Directions\nto run",  "Hardware/\nSoftware\nRequirements", "Common\nFile\nFormats", "Unique &\nPersistent\nIdentifiers", "Metadata")
 
 plot_q7$source <- factor(plot_q7$source, levels=c("data", "code", "dir", "hardw","common", "doi", "meta"), labels=q7_labels)  	
 plot_q7$Q2_abbrev <- factor(plot_q7$Q2_abbrev, levels=journal_abbrev)  	
-  	 	
+
+### Create plot
 p <- ggplot(subset(plot_q7, source != "None"), aes(x=source, y=value, fill=Q2_abbrev)) 
 p <- p + geom_bar(stat = 'identity', width=0.8, position = position_dodge(width=0.8))
 p <- p + scale_y_continuous(name="Proportion of Articles", labels = scales::percent, expand = c(0, 0), limits = c(0, .5))
-p <- p + scale_x_discrete(name="Availability Elements")
-p <- p + scale_fill_manual(name="Journal", values=journal_colors[c(1, 2, 6, 5, 4, 3)]) 
+p <- p + scale_x_discrete(name="Available Artifacts (Q7)")
+p <- p + scale_fill_manual(name="Journal", breaks=journal_abbrev, values=journal_colors[c(1, 2, 6, 5, 4, 3)]) 
 p <- p + facet_grid(. ~ facet, drop=TRUE, scales="free_x")
 p <- p + theme_classic_new(9.5) +   theme(legend.position="bottom") + guides(fill = guide_legend(nrow = 1))
 p 	
 
-cvd_grid(p)
+#cvd_grid(p)
 
 ### Save figure
-ggsave(paste0(file.path(write_figures_path,"png/"), "avail_elements_by_elements", ".png"), p, width=5.5, height=3.85, dpi=600)
-ggsave(paste0(file.path(write_figures_path,"svg/"), "avail_elements_by_elements", ".svg"), p, width=5.5, height=3.85)
-ggsave(paste0(file.path(write_figures_path,"pdf/"), "avail_elements_by_elements", ".pdf"), p, width=5.5, height=3.85)
+ggsave(file.path(write_output_path, "q7_by_journal.png"), p,  width=5.5, height=3.85, dpi=600)
+ggsave(file.path(write_output_path, "q7_by_journal.svg"), p,  width=5.5, height=3.85)
+ggsave(file.path(write_output_path, "q7_by_journal.pdf"), p,  width=5.5, height=3.85)
 
 p <- ggplot(subset(plot_q7, source != "None"), aes(x=Q2_abbrev, y=value, fill=source))
 p <- p + geom_bar(stat = 'identity', width=0.75, position = position_dodge(width=0.75))
 p <- p + scale_y_continuous(name="Proportion of Articles", labels = scales::percent, expand = c(0, 0), limits = c(0, 0.5))
 p <- p + scale_x_discrete(name="Journal")
-p <- p + scale_fill_manual(name="Availability Elements", values=c("#e31a1c", "#a65628", "#ff7f00",  "#1f78b4","#a6cee3","#33a02c", "#b2df8a"), guide=guide_legend(nrow=2,byrow=TRUE))#cb_pal("nature", n=7, sort=TRUE)) 
+p <- p + scale_fill_manual(name="Available Artifacts", values=c("#e31a1c", "#a65628", "#ff7f00",  "#1f78b4","#a6cee3","#33a02c", "#b2df8a"), guide=guide_legend(nrow=2,byrow=TRUE))#cb_pal("nature", n=7, sort=TRUE)) 
 p <- p + theme_classic_new(9.5) +   theme(legend.position="bottom")
 p 	
 
-cvd_grid(p)
-c("#d53e4f","#f46d43","#fdae61", "#3288bd", "#66c2a5", "#abdda4", "#e6f598")
-c("#e31a1c", "#ff7f00", "#6a3d9a", "#a6cee3","#1f78b4","#b2df8a","#33a02c")
+#cvd_grid(p)
+#c("#d53e4f","#f46d43","#fdae61", "#3288bd", "#66c2a5", "#abdda4", "#e6f598")
+#c("#e31a1c", "#ff7f00", "#6a3d9a", "#a6cee3","#1f78b4","#b2df8a","#33a02c")
 
 ### Save figure
-ggsave(paste0(file.path(write_figures_path,"png/"), "avail_elements_by_journal", ".png"), p, width=5.5, height=3.85, dpi=600)
-ggsave(paste0(file.path(write_figures_path,"svg/"), "avail_elements_by_journal", ".svg"), p, width=5.5, height=3.85)
-ggsave(paste0(file.path(write_figures_path,"pdf/"), "avail_elements_by_journal", ".pdf"), p, width=5.5, height=3.85)
+ggsave(file.path(write_output_path, "q7_by_artifacts.png"), p,  width=5.5, height=3.85, dpi=600)
+ggsave(file.path(write_output_path, "q7_by_artifacts.svg"), p,  width=5.5, height=3.85)
+ggsave(file.path(write_output_path, "q7_by_artifacts.pdf"), p,  width=5.5, height=3.85)
 
- 	 	
+
 p <- ggplot(subset(plot_q7, source != "None"), aes(x=source, y=value)) 
 p <- p + geom_bar(stat = 'identity', width=0.8, position = position_dodge(width=0.8), fill="grey20")
-p <- p + scale_y_continuous(name="Proportion of Articles", labels = scales::percent, expand = c(0, 0), limits = c(0, .5))
-p <- p + scale_x_discrete(name="Availability Elements")
+p <- p + scale_y_continuous(name="All Surveyed Articles", labels = scales::percent, expand = c(0, 0), limits = c(0, .5))
+p <- p + scale_x_discrete(name="Available Artifacts")
 #p <- p + scale_fill_manual(name="Journal", values=journal_colors) 
 p <- p + theme_classic_new(9.5) +   theme(legend.position="bottom") + guides(fill = guide_legend(nrow = 1))
 p <- p + facet_grid(. ~ facet, drop=TRUE, scales="free_x")
 p 	
 
 ### Save figure
-ggsave(paste0(file.path(write_figures_path,"png/"), "avail_elements_all_bw", ".png"), p, width=5.5, height=3, dpi=600)
-ggsave(paste0(file.path(write_figures_path,"svg/"), "avail_elements_all_bw", ".svg"), p, width=5.5, height=3)
-ggsave(paste0(file.path(write_figures_path,"pdf/"), "avail_elements_all_bw", ".pdf"), p, width=5.5, height=3)
-
+ggsave(file.path(write_output_path, "q7_allsurveyed_bw.png"), p,  width=5.5, height=3, dpi=600)
+ggsave(file.path(write_output_path, "q7_allsurveyed_bw.svg"), p,  width=5.5, height=3)
+ggsave(file.path(write_output_path, "q7_allsurveyed_bw.pdf"), p,  width=5.5, height=3)
 
 
 p <- ggplot(subset(plot_q7, source != "None"), aes(x=source, y=value, fill=source)) 
 p <- p + geom_bar(stat = 'identity', width=0.8, position = position_dodge(width=0.8))
-p <- p + scale_y_continuous(name="Proportion of Articles", labels = scales::percent, expand = c(0, 0), limits = c(0, .5))
-p <- p + scale_x_discrete(name="Availability Elements")
-p <- p + scale_fill_manual(name="Availability Elements", values=c("#e31a1c", "#a65628", "#ff7f00",  "#1f78b4","#a6cee3","#33a02c", "#b2df8a"), guide=FALSE)#cb_pal("nature", n=7, sort=TRUE))
+p <- p + scale_y_continuous(name="All Surveyed Articles", labels = scales::percent, expand = c(0, 0), limits = c(0, .5))
+p <- p + scale_x_discrete(name="Available Artifacts")
+p <- p + scale_fill_manual(name="Available Artifacts", values=c("#e31a1c", "#a65628", "#ff7f00",  "#1f78b4","#a6cee3","#33a02c", "#b2df8a"), guide=FALSE)#cb_pal("nature", n=7, sort=TRUE))
 p <- p + facet_grid(. ~ facet, drop=TRUE, scales="free_x")
 p <- p + theme_classic_new(9.5) +   theme(legend.position="bottom")
 p 	
 
 ### Save figure
-ggsave(paste0(file.path(write_figures_path,"png/"), "avail_elements_all_color", ".png"), p, width=5.5, height=3, dpi=600)
-ggsave(paste0(file.path(write_figures_path,"svg/"), "avail_elements_all_color", ".svg"), p, width=5.5, height=3)
-ggsave(paste0(file.path(write_figures_path,"pdf/"), "avail_elements_all_color", ".pdf"), p, width=5.5, height=3)
-
-
+ggsave(file.path(write_output_path, "q7_allsurveyed_color.png"), p,  width=5.5, height=3, dpi=600)
+ggsave(file.path(write_output_path, "q7_allsurveyed_color.svg"), p,  width=5.5, height=3)
+ggsave(file.path(write_output_path, "q7_allsurveyed_color.pdf"), p,  width=5.5, height=3)
 
 ###########################################################################
-###  Plot Reproducibility (Q11)
+###  Plot Replicability (Q11)
 ###########################################################################
-## q11_labels
+### Set up output folders
+write_output_path <- file.path(write_figures_path, "replicability")
+dir.create(write_output_path, recursive=TRUE)
 
 plot_q11 <- reproduc_df%>%
   	 filter(rep_avail_clean =="repro") %>%
@@ -678,41 +640,23 @@ repro_colors <- cb_pal("ptol", n=4, sort=FALSE)
 repro_colors <- repro_colors[c(1,4,3,2)]
 #repro_colors
  
- 
 ### Plot as separate bars  
   p <- ggplot(data = plot_q11, aes(x = Q11, y = n, fill = Q11)) 
   p <- p + geom_bar(stat = 'identity', width=0.8, position = position_dodge(width=0.8))
   p <- p + scale_y_continuous(name="Number of Articles", expand = c(0, 0), limits = c(0, 11), breaks=seq(0,20,2))
-  p <- p + scale_x_discrete(name="Reproducibility Determination")
-  p <- p + scale_fill_manual(name="Reproducibility Determination", values=repro_colors)#, limits=levels(avail_journal$Q5_leading)) 
+  p <- p + scale_x_discrete(name="Replicability Determination (Q11)")
+  p <- p + scale_fill_manual(name="Replicability Determination (Q11)", values=repro_colors)#, limits=levels(avail_journal$Q5_leading)) 
   p <- p + theme_classic_new(9.5) +   theme(legend.position="none")
   p 
   
 ### Save figure
-ggsave(paste0(file.path(write_figures_path,"png/"), "repro_determ_color", ".png"), p, width=5.5, height=3, dpi=600)
-ggsave(paste0(file.path(write_figures_path,"svg/"), "repro_determ_color", ".svg"), p, width=5.5, height=3)
-ggsave(paste0(file.path(write_figures_path,"pdf/"), "repro_determ_color", ".pdf"), p, width=5.5, height=3)
-
- ### Plot as separate bars  
-  p <- ggplot(data = plot_q11, aes(x = Q11, y = prop_all, fill = Q11)) 
-  p <- p + geom_bar(stat = 'identity', width=0.8, position = position_dodge(width=0.8))
-  p <- p + scale_y_continuous(name="Number of Articles", labels = scales::percent, expand = c(0, 0), limits = c(0, 0.55))
-  p <- p + scale_x_discrete(name="Reproducibility Determination")
-  p <- p + scale_fill_manual(name="Reproducibility Determination", values=repro_colors)#, limits=levels(avail_journal$Q5_leading)) 
-  p <- p + theme_classic_new(9.5) +   theme(legend.position="none")
-  p 
-   
-  
-  cvd_grid(p)
-  
-### Save figure
-ggsave(paste0(file.path(write_figures_path,"png/"), "repro_determ_perc_color", ".png"), p, width=5.5, height=3, dpi=600)
-ggsave(paste0(file.path(write_figures_path,"svg/"), "repro_determ_perc_color", ".svg"), p, width=5.5, height=3)
-ggsave(paste0(file.path(write_figures_path,"pdf/"), "repro_determ_perc_color", ".pdf"), p, width=5.5, height=3)
+ggsave(file.path(write_output_path, "q11_color.png"), p,  width=5.5, height=3, dpi=600)
+ggsave(file.path(write_output_path, "q11_color.svg"), p,  width=5.5, height=3)
+ggsave(file.path(write_output_path, "q11_color.pdf"), p,  width=5.5, height=3)
 
 
 ###########################################################################
-###  Plot Reproducibility Failure (Q13)
+###  Plot Replicability Failure Cause (Q13)
 ###########################################################################
 #sSor for plotting
 plot_q13 <- q13_journal_perc%>%
@@ -729,37 +673,29 @@ plot_q13 <- q13_journal_count%>%
 plot_q13 <- plot_q13 %>%
 	filter(failure != "none")
 
-#q7_labels[4] <- "Hardware/\nSoftware\nRequirements"
-#q7_labels[5] <- "Unique &\nPersistent\nIdentifiers"
-
 plot_q13$failure <- factor(plot_q13$failure, levels=c("unclear", "differ", "no_result", "hard_soft", "other", "none", "avail_fail"), labels=c(q13_labels, "Availability\nFail"))  #plot_q13$failure <- factor(plot_q13$failure, levels=c("unclear", "differ", "no_result", "hard_soft", "other", "none", "avail_fail"), labels=c(q13_labels, "Availability\nFail"))  	
   	 	
 p <- ggplot(plot_q13, aes(x=failure, y=value)) 
 p <- p + geom_bar(stat = 'identity')#, width=0.8, position = position_dodge(width=0.8))
 p <- p + scale_y_continuous(name="Number of Articles", breaks=seq(0,20,2), expand = c(0, 0))
 p <- p + coord_cartesian(ylim = c(0, 11))
-p <- p + scale_x_discrete(name="Reproducibility Failure Cause", limits=c("Availability\nFail", "Unclear directions", "Did not generate results", "Hardware/software error", "Results differed", "Other"), labels=c("Availability\nFail", "Unclear\ndirections", "Did not\ngenerate results", "Hardware/software\nerror", "Results\ndiffered", "Other"))
+p <- p + scale_x_discrete(name="Why Did Replication Fail (Q13)", limits=c("Availability\nFail", "Unclear directions", "Did not generate results", "Hardware/software error", "Results differed", "Other"), labels=c("Availability\nFail", "Unclear\ndirections", "Did not\ngenerate results", "Hardware/software\nerror", "Results\ndiffered", "Other"))
 #p <- p + scale_fill_manual(name="Journal", values=journal_colors) 
 p <- p + theme_classic_new(9.5) +   theme(legend.position="bottom") + guides(fill = guide_legend(nrow = 1))
 p 	
-
   
 ### Save figure
-ggsave(paste0(file.path(write_figures_path,"png/"), "repro_failure_cause_bw", ".png"), p, width=5.5, height=3, dpi=600)
-ggsave(paste0(file.path(write_figures_path,"svg/"), "repro_failure_cause_bw", ".svg"), p, width=5.5, height=3)
-ggsave(paste0(file.path(write_figures_path,"pdf/"), "repro_failure_cause_bw", ".pdf"), p, width=5.5, height=3)
+ggsave(file.path(write_output_path, "q13_bw.png"), p,  width=5.5, height=3, dpi=600)
+ggsave(file.path(write_output_path, "q13_bw.svg"), p,  width=5.5, height=3)
+ggsave(file.path(write_output_path, "q13_bw.pdf"), p,  width=5.5, height=3)
 
 
-reproduc_df %>%
-	filter(rep_avail == "repro") %>%
-	filter(Q13_none == TRUE)
-
+### Output replicability paper details
 reproduc_df %>%
 	filter(rep_avail == "repro") %>%
 	filter(Q11 != "Availability\nFail") %>%
 	select(Q4, Q11, keyword) %>%
 	arrange(Q11)
-
 
 ### Chi squared test of number of partially reproducible papers from keyword vs non-keyword
 prop.test(x = c(5,1), n=c(119, 241), p = NULL, alternative = "greater", correct = TRUE)
@@ -767,9 +703,12 @@ prop.test(x = c(5,1), n=c(119, 241), p = NULL, alternative = "greater", correct 
 	
 	
 #################
-###  Plot time spent on paper
+###  Plot time spent on paper   (Q12)
 ################ 
-reproduc_df$Q12
+### Set up output folders
+write_output_path <- file.path(write_figures_path, "time_spent")
+dir.create(write_output_path, recursive=TRUE)
+
 
 reproduc_df$stopping_point <- "Availability"
 reproduc_df$stopping_point[reproduc_df$Q5 != "Some or all available"] <- "Paper Type"
@@ -790,13 +729,16 @@ p <- p + geom_boxplot(fill="grey")
 p <- p + stat_summary(fun.y=mean, colour="#e41a1c", geom="point", shape=18, size=3,show_guide = FALSE)
 p <- p + coord_flip(ylim=c(0,121))
 p <- p + theme_classic_new(9.5)
-p <- p + scale_x_discrete(name="Stopping Point")
+p <- p + scale_x_discrete(name="Survey Ending Question", breaks=c( "Reproducibility", "Availability", "Paper Type"), labels=c( "Replicability of\nResults\n(Q13)", "Availability of\nArtifacts\n(Q9)", "No Artifacts\nAvailable\n(Q5)"))
 p <- p + scale_y_continuous(name="Time Spent (Minutes)", breaks=seq(0,500,15))
 p
+
 ### Save figure
-ggsave(paste0(file.path(write_figures_path,"png/"), "time_spent_boxplot", ".png"), p, width=4.5, height=3, dpi=600)
-ggsave(paste0(file.path(write_figures_path,"svg/"), "time_spent_boxplot", ".svg"), p, width=4.5, height=3)
-ggsave(paste0(file.path(write_figures_path,"pdf/"), "time_spent_boxplot", ".pdf"), p, width=4.5, height=3)
+ggsave(file.path(write_output_path, "q12_box_whiskers.png"), p,  width=4.5, height=3, dpi=600)
+ggsave(file.path(write_output_path, "q12_box_whiskers.svg"), p,  width=4.5, height=3)
+ggsave(file.path(write_output_path, "q12_box_whiskers.pdf"), p,  width=4.5, height=3)
+
+
 
 p <- ggplot(reproduc_df, aes(x=stopping_point, y=Q12))
 p <- p + geom_violin(fill="grey", adjust = 1.5)
@@ -804,13 +746,13 @@ p <- p + geom_jitter(height = 0, width = 0.07, colour="black", alpha=0.3, size=0
 p <- p + stat_summary(fun.y=mean, colour="#e41a1c", geom="point", shape=18, size=3,show_guide = FALSE)
 p <- p + coord_flip()
 p <- p + theme_classic_new(9.5)
-p <- p + scale_x_discrete(name="Stopping Point")
+p <- p + scale_x_discrete(name="Survey Ending Question", breaks=c( "Reproducibility", "Availability", "Paper Type"), labels=c( "Replicability of\nResults\n(Q13)", "Availability of\nArtifacts\n(Q9)", "No Artifacts\nAvailable\n(Q5)"))
 p <- p + scale_y_continuous(name="Time Spent (Minutes)", breaks=seq(0,500,15))
 p
 ### Save figure
-ggsave(paste0(file.path(write_figures_path,"png/"), "time_spent_violin", ".png"), p, width=4.5, height=3, dpi=600)
-ggsave(paste0(file.path(write_figures_path,"svg/"), "time_spent_violin", ".svg"), p, width=4.5, height=3)
-ggsave(paste0(file.path(write_figures_path,"pdf/"), "time_spent_violin", ".pdf"), p, width=4.5, height=3)
+ggsave(file.path(write_output_path, "q12_violin.png"), p,  width=4.5, height=3, dpi=600)
+ggsave(file.path(write_output_path, "q12_violin.svg"), p,  width=4.5, height=3)
+ggsave(file.path(write_output_path, "q12_violin.pdf"), p,  width=4.5, height=3)
 
 p <- ggplot(reproduc_df, aes(x=Q12))
 p <- p + geom_histogram(binwidth=5)
@@ -819,22 +761,21 @@ p <- p + scale_x_continuous(name="Time Spent (Minutes)", breaks=seq(0,500,15), e
 p <- p + scale_y_continuous(name="Count", expand = c(0, 0))
 p 
 ### Save figure
-ggsave(paste0(file.path(write_figures_path,"png/"), "time_spent_hist", ".png"), p, width=4.5, height=3, dpi=600)
-ggsave(paste0(file.path(write_figures_path,"svg/"), "time_spent_hist", ".svg"), p, width=4.5, height=3)
-ggsave(paste0(file.path(write_figures_path,"pdf/"), "time_spent_hist", ".pdf"), p, width=4.5, height=3)
-
+ggsave(file.path(write_output_path, "q12_histogram.png"), p,  width=4.5, height=3, dpi=600)
+ggsave(file.path(write_output_path, "q12_histogram.svg"), p,  width=4.5, height=3)
+ggsave(file.path(write_output_path, "q12_histogram.pdf"), p,  width=4.5, height=3)
 
 
 p <- ggplot(reproduc_df, aes(x=Q12, y=stopping_point))
-p <- p + geom_density_ridges( size=0.2, bandwidth=2)
+p <- p + geom_density_ridges( size=0.2, bandwidth=10)
 p <- p + theme_classic_new(9.5)
 p <- p + scale_x_continuous(name="Time Spent (Minutes)", breaks=seq(0,500,15), expand = c(0, 0))
-#p <- p + scale_y_continuous(name="Count", expand = c(0, 0))
+p <- p + scale_y_discrete(name="Survey Ending Question", breaks=c( "Reproducibility", "Availability", "Paper Type"), labels=c( "Replicability of\nResults\n(Q13)", "Availability of\nArtifacts\n(Q9)", "No Artifacts\nAvailable\n(Q5)"))
 p 
 ### Save figure
-ggsave(paste0(file.path(write_figures_path,"png/"), "time_spent_ridge", ".png"), p, width=4.5, height=3, dpi=600)
-ggsave(paste0(file.path(write_figures_path,"svg/"), "time_spent_ridge", ".svg"), p, width=4.5, height=3)
-ggsave(paste0(file.path(write_figures_path,"pdf/"), "time_spent_ridge", ".pdf"), p, width=4.5, height=3)
+ggsave(file.path(write_output_path, "q12_ridge.png"), p,  width=4.5, height=3, dpi=600)
+ggsave(file.path(write_output_path, "q12_ridge.svg"), p,  width=4.5, height=3)
+ggsave(file.path(write_output_path, "q12_ridge.pdf"), p,  width=4.5, height=3)
 
 
 # Boxplots by journal
@@ -844,18 +785,19 @@ p <- p + geom_boxplot()
 p <- p + scale_fill_manual(name="Journal", values=journal_colors) 
 p <- p + coord_flip()
 p <- p + theme_classic_new(9.5)
-p <- p + scale_x_discrete(name="Stopping Point")
+p <- p + scale_x_discrete(name="Survey Ending Question", breaks=c( "Reproducibility", "Availability", "Paper Type"), labels=c( "Replicability of\nResults\n(Q13)", "Availability of\nArtifacts\n(Q9)", "No Artifacts\nAvailable\n(Q5)"))
 p <- p + scale_y_continuous(name="Time Spent (Minutes)", breaks=seq(0,500,15))
 p
 #
 ### Save figure
-ggsave(paste0(file.path(write_figures_path,"png/"), "time_spent_box_byjournal", ".png"), p, width=4.5, height=3, dpi=600)
-ggsave(paste0(file.path(write_figures_path,"svg/"), "time_spent_box_byjournal", ".svg"), p, width=4.5, height=3)
-ggsave(paste0(file.path(write_figures_path,"pdf/"), "time_spent_box_byjournal", ".pdf"), p, width=4.5, height=3)
+ggsave(file.path(write_output_path, "q12_box_whiskers_byjournal.png"), p,  width=4.5, height=3, dpi=600)
+ggsave(file.path(write_output_path, "q12_box_whiskers_byjournal.svg"), p,  width=4.5, height=3)
+ggsave(file.path(write_output_path, "q12_box_whiskers_byjournal.pdf"), p,  width=4.5, height=3)
+
 
 
 #################
-###  River Plot
+###  Generate River Plot
 ################ 
 
 #######################
@@ -885,7 +827,7 @@ q5_freq$Value <- q5_freq$value
 paper_edges_level2 <- q5_freq %>% dplyr::select(N1, N2, Value)
 
 #q5_labels <- levels(reproduc_df$Q5)
-q5_labels <- c("Dataless\nor review [34]", "No\navailability [73]", "Some\navailability [253]")
+q5_labels <- c("Dataless\nor review [34]", "Not specified\nwhere [73]", "Some\navailability [253]")
 #q5_levels <- paste0("Q5_", seq(1,length(q5_labels)))
 
 ### Calculate nodes 
@@ -965,7 +907,7 @@ paper_edges_level4 <- q7_freq %>%
 
 ### Calculate nodes 
 #q7_labels <- paste0("Primary ", seq(0,3))
-q7_labels <- c("No elements [51]", "Only 1\nelement [80]", "Only 2\nelements [24]", "Directions, code\n& data [20]")
+q7_labels <- c("No primary\nartifacts [51]", "1 of 3 primary\nartifacts [80]", "2 of 3 primary\nartifacts [24]", "Directions, code\n& data [20]")
 #q7_labels <- c("q7_1", "q7_2", "q7_3", "q7_4")
 
 ### Calculate nodes 
@@ -1044,26 +986,28 @@ style[["textcex"]] <- 1.4
 style[["srt"]] <- "0"
 plot( river, default_style= style , yscale=1, fix.pdf=TRUE)
 
-river_file <- paste0(file.path(write_figures_path,"png/"), "papers_riverplot")
+
+### Set up output folders and file
+write_output_path <- file.path(write_figures_path, "river_plot")
+dir.create(write_output_path, recursive=TRUE)
+river_file <- file.path(write_output_path, "papers_riverplot")
 
 png(paste0(river_file, '.png'), width = 13, height = 9, units = 'in', res = 300)
 plot( river, default_style= style , yscale=1, fix.pdf=TRUE)
 dev.off()
 
-river_file <- paste0(file.path(write_figures_path,"svg/"), "papers_riverplot")
 svg(paste0(river_file, '.svg'), width = 13, height = 9)#, units = 'in')#, res = 300)
 plot( river, default_style= style , yscale=1, fix.pdf=TRUE)
 dev.off()
 
-river_file <- paste0(file.path(write_figures_path,"pdf/"), "papers_riverplot")
 pdf(paste0(river_file, '.pdf'), width = 13, height = 9)#, units = 'in')#, res = 300)
 plot( river, default_style= style , yscale=1, fix.pdf=TRUE)
 dev.off()
 
 
 ### Output to csv
-write.csv(paper_edges, file.path(write_output_base_path, "paper_edges.csv"))
-write.csv(paper_nodes, file.path(write_output_base_path, "paper_nodes.csv"))
+write.csv(paper_edges, file.path(write_output_path, "paper_edges.csv"))
+write.csv(paper_nodes, file.path(write_output_path, "paper_nodes.csv"))
 
 
 ################################

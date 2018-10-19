@@ -1,37 +1,43 @@
-
-### Clear any existing data or functions.
-rm(list=ls())
+# *------------------------------------------------------------------
+# | PROGRAM NAME: 04_pop_estimate
+# | FILE NAME: 04_pop_estimate.R
+# | DATE: 
+# | CREATED BY:  Jim Stagge         
+# *----------------------------------------------------------------
+# | PURPOSE:  This code generates the population estimate for all papers
+# | in 2017 through resampling.
+# | 
+# |
+# *------------------------------------------------------------------
 
 ###########################################################################
 ## Set the Paths
 ###########################################################################
 ### Path for Data and Output	
-data_path <- "../../data"
-output_path <- "../../output"
-global_path <- "../global_func"
+data_path <- "./data"
+output_path <- "./output"
+global_path <- "./global_func"
 function_path <- "./functions"
 
 ### Set output location
-output_name <- "reproduc"
-write_output_base_path <- file.path(output_path, output_name)
+write_output_base_path <- output_path
 
 dir.create(write_output_base_path)
-
-### Set input location
-data_path<- file.path(data_path, "reproduc")
 
 ###########################################################################
 ###  Load functions
 ###########################################################################
 ### Load these functions for all code
-require(colorout)
+#require(colorout)
 require(assertthat)
 require(staggefuncs)
 require(tidyverse)
-require(colorblindr)
+#require(colorblindr)
 
 ### Load these functions for this unique project
 require(ggthemes)
+require(MultinomialCI)
+
 ### Fix the select command
 select <- dplyr::select
 
@@ -42,7 +48,6 @@ sapply(file.path(function_path, file.sources),source)
 ### Load global functions
 file.sources = list.files(global_path, pattern="*.R", recursive=TRUE)
 sapply(file.path(global_path, file.sources),source)
-
 
 
 ###########################################################################
@@ -57,16 +62,13 @@ journal_colors <- cb_pal("custom", n=6, sort=FALSE)
 ###########################################################################
 ### Set up output folders
 write_figures_path <- file.path(write_output_base_path, "figures")
-dir.create(file.path(write_figures_path,"png"), recursive=TRUE)
-dir.create(file.path(write_figures_path,"pdf"), recursive=TRUE)
-dir.create(file.path(write_figures_path,"svg"), recursive=TRUE)
-
-
+write_output_path <- file.path(write_figures_path, "population_estimate")
+dir.create(write_output_path, recursive=TRUE)
 
 ###########################################################################
 ## Load data
 ###########################################################################
-load(file=file.path(write_output_base_path, "reproduc_data.rda"))
+load(file=file.path(write_output_base_path, "survey_analysis/reproduc_data.rda"))
 
 reproduc_df <- readRDS(file.path(write_output_base_path, "reproduc_df.rds"))
 
@@ -131,30 +133,28 @@ final_determ$final_determ <- factor(final_determ$final_determ , levels = c("Data
 table(final_determ$final_determ)
 sum(table(final_determ$final_determ))
 
-yup <- final_determ %>% 
+final_determ_sampled_papers <- final_determ %>% 
 	#select(Q2_abbrev, keyword, final_determ) %>% 
 	group_by(Q2_abbrev, keyword, final_determ) %>%
 	summarize(count = n()) %>%
 	complete(Q2_abbrev, keyword, final_determ, fill = list(count = 0)) %>%
 	distinct
 
-
-
 ###########################################################################
 ## Loop and resample
 ###########################################################################
-require(MultinomialCI)
 
 n_runs <- 5000
 
 ### Set the random seed so results can be reproduced
 set.seed(6511)
 
+### Start clock to test how long it takes
 start_time <- Sys.time()
-
 
 for (j in seq(1,n_runs)) {
 
+### Output progress
 cat(paste0("  j: ", j, "   of: ", n_runs, "\n"))
 
 for (i in seq(1, dim(categories)[1])){
@@ -166,7 +166,7 @@ for (i in seq(1, dim(categories)[1])){
 	n_unsampled_i <- categories$n_unsampled_need[i]
 	
 	### Subset papers
-	papers_i <- yup %>% 
+	papers_i <- final_determ_sampled_papers %>% 
 		filter(Q2_abbrev == journal_i & keyword == keyword_i)
 
 	### Generate sampled data
@@ -235,45 +235,46 @@ if (j == 1){
 Sys.time() - start_time
 
 
+
+###########################################################################
+## Summarize results
+###########################################################################
 ### Add column for total number of papers
 ### Use this to calculate proportion
 paper_totals <- pub_summary_table %>% 
 	select(Q2_abbrev=journal_abbrev, total) %>%
 	bind_rows(summarise_all(., funs(if(is.numeric(.)) sum(.) else "Total")))
 	
-yup <- papers_pop %>%
+paper_all_sims <- papers_pop %>%
 	left_join(paper_totals)
 
-yup <- yup %>% mutate(proportion=count/total)
+paper_all_sims <- paper_all_sims %>% mutate(proportion=count/total)
 
-yup$Q2_abbrev <- factor(yup$Q2_abbrev, levels=c(levels(reproduc_df$Q2_abbrev), "Total"))
+paper_all_sims$Q2_abbrev <- factor(paper_all_sims$Q2_abbrev, levels=c(levels(reproduc_df$Q2_abbrev), "Total"))
 
-
-ggplot(papers_pop, aes(x=final_determ, fill=Q2_abbrev, y=count)) + geom_boxplot(position="dodge") + theme_classic_correct()
-
-ggplot(yup, aes(x=final_determ, fill=Q2_abbrev, y=proportion)) + geom_boxplot(position="dodge") + scale_fill_manual(values=c(journal_colors,"grey50"))+ theme_classic_correct()
-
-
-ggplot(yup, aes(x=final_determ, fill=Q2_abbrev, y=proportion)) + geom_violin(position="dodge") + scale_fill_manual(values=c(journal_colors,"grey50"))+ theme_classic_correct()
-
-yup_summary <- yup %>%
+paper_summary_all_sims <- paper_all_sims%>%
 	group_by(Q2_abbrev, final_determ) %>%
 	summarize(median = quantile(proportion, 0.5), ll = quantile(proportion, 0.025), ul= quantile(proportion, 0.975))
 
-p <- ggplot(yup_summary, aes(x = final_determ, group=Q2_abbrev, colour=Q2_abbrev)) + geom_errorbar(aes(ymin = ll, ymax = ul), position = position_dodge(width = 0.5), size=2) + theme_classic() + scale_colour_manual(values=c(journal_colors,"black"))
-p
+### Testing figures
+#ggplot(papers_pop, aes(x=final_determ, fill=Q2_abbrev, y=count)) + geom_boxplot(position="dodge") + theme_classic_new(9.5)
+
+#ggplot(paper_all_sims, aes(x=final_determ, fill=Q2_abbrev, y=proportion)) + geom_boxplot(position="dodge") + scale_fill_manual(values=c(journal_colors,"grey50"))+ theme_classic_new(9.5)
+
+#ggplot(paper_all_sims, aes(x=final_determ, fill=Q2_abbrev, y=proportion)) + geom_violin(position="dodge") + scale_fill_manual(values=c(journal_colors,"grey50")) + theme_classic_new(9.5)
+
+#p <- ggplot(paper_summary_all_sims, aes(x = final_determ, group=Q2_abbrev, colour=Q2_abbrev)) + geom_errorbar(aes(ymin = ll, ymax = ul), position = position_dodge(width = 0.5), size=2) + theme_classic_new(9.5) + scale_colour_manual(values=c(journal_colors,"black"))
+#p
+#p + coord_flip() + scale_x_discrete(limits = rev(levels(yup_summary$final_determ))) 
+
+# p <- ggplot(paper_summary_all_sims, aes(x = final_determ, group=Q2_abbrev, colour=Q2_abbrev)) + geom_pointrange(aes(y=median, ymin = ll, ymax = ul), position = position_dodge(width = 0.5), size=1) + theme_classic() + scale_colour_manual(values=c(journal_colors,"black"))
+#p
 
 
-
-p + coord_flip() + scale_x_discrete(limits = rev(levels(yup_summary$final_determ))) 
-
- 
- p <- ggplot(yup_summary, aes(x = final_determ, group=Q2_abbrev, colour=Q2_abbrev)) + geom_pointrange(aes(y=median, ymin = ll, ymax = ul), position = position_dodge(width = 0.5), size=1) + theme_classic() + scale_colour_manual(values=c(journal_colors,"black"))
-p
-
+### Generate the final figures
 plot_labels <- c("Dataless or\nReview", "Author or Third Party\nRequest Only", "No Availability", "Some Availability", "Available, but\nNot Replicable", "Some or All\nReplicable")
 
-p <- ggplot(yup_summary, aes(x = final_determ, group=Q2_abbrev, colour=Q2_abbrev)) %>%
+p <- ggplot(paper_summary_all_sims, aes(x = final_determ, group=Q2_abbrev, colour=Q2_abbrev)) %>%
 	+ geom_pointrange(aes(y=median, ymin = ll, ymax = ul), position = position_dodge(width = 0.5), size=.75) %>%
 	+ theme_classic_new(10) %>%
 	+ scale_colour_manual(name ="Journal", values=c(journal_colors,"black")) %>%
@@ -284,14 +285,13 @@ p <- ggplot(yup_summary, aes(x = final_determ, group=Q2_abbrev, colour=Q2_abbrev
 p
 
 ### Save figure
-ggsave(paste0(file.path(write_figures_path,"png/"), "pop_horizontal", ".png"), p, width=7, height=4, dpi=600)
-
-ggsave(paste0(file.path(write_figures_path,"svg/"), "pop_horizontal", ".svg"), p, width=7, height=4)
-ggsave(paste0(file.path(write_figures_path,"pdf/"), "pop_horizontal", ".pdf"), p, width=7, height=4)
-
+ggsave(file.path(write_output_path, "pop_horizontal.png"), p,  width=7, height=4, dpi=600)
+ggsave(file.path(write_output_path, "pop_horizontal.svg"), p,  width=7, height=4)
+ggsave(file.path(write_output_path, "pop_horizontal.pdf"), p,  width=7, height=4)
 
 
-p <- ggplot(yup_summary, aes(x = final_determ, group=Q2_abbrev, colour=Q2_abbrev)) %>%
+### Plot it vertically
+p <- ggplot(paper_summary_all_sims, aes(x = final_determ, group=Q2_abbrev, colour=Q2_abbrev)) %>%
 	+ geom_pointrange(aes(y=median, ymin = ll, ymax = ul), position = position_dodge(width = -0.4), size=.75) %>%
 	+ theme_classic_new(10) %>%
 	+ scale_colour_manual(name="Journal", values=c(journal_colors,"black")) %>%
@@ -303,329 +303,13 @@ p <- ggplot(yup_summary, aes(x = final_determ, group=Q2_abbrev, colour=Q2_abbrev
 p
 
 ### Save figure
-ggsave(paste0(file.path(write_figures_path,"png/"), "pop_vertical", ".png"), p, width=4.2, height=6, dpi=600)
-
+ggsave(file.path(write_output_path, "pop_vertical.png"), p,  width=4.2, height=6, dpi=600)
+ggsave(file.path(write_output_path, "pop_vertical.svg"), p,  width=4.2, height=6)
+ggsave(file.path(write_output_path, "pop_vertical.pdf"), p,  width=4.2, height=6)
 
 
 ### Output to csv
-write.csv(yup_summary, file.path(write_output_base_path, "population_est.csv"))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-require(ggridges)
-ggplot(yup, aes(y=final_determ, fill=Q2_abbrev, x=proportion)) + geom_density_ridges()
-
-ggplot(yup, aes(y=final_determ, fill=Q2_abbrev, x=proportion)) + geom_density_ridges2(stat="binline",alpha=0.8) + scale_fill_manual(values=c(journal_colors,"grey50"))
-
-
-ggplot(yup,x = 
- geom_errorbar(aes(ymin = lower, ymax = upper), position = dodge, width = 0.25)
- 
- 
-
-geom_dumbbell for the 95% confidence interval
-violin plot
-
-
-
-
-
-geom_ribbon(aes(ymin = as.integer(activity), ymax = as.integer(activity) + 2 * p_smooth), color='white', size=0.4)
-
-
-
-
-
-
-
-n_sample <- yup %>% filter(Q2_abbrev == "JAWRA" & keyword == FALSE)
-
-require(MultinomialCI)
-multinomialCI(n_sample$count, 0.05)
-
-require(CoinMinD)
-SG(n_sample$count,0.05)
-GM(n_sample$count,0.05)
-BMDE(n_sample$count,1)
-
-yup3 <- capture.output(BMDE(n_sample$count,1))
-
-pop_est <- data.frame(mean=strsplit(yup3[2], split=" "), ll=strsplit(yup3[4], split=" "), ul=strsplit(yup3[6], split=" "))
-
-pop_est <- pop_est[seq(2,dim(pop_est)[1]),]
-pop_est <- mutate_all(pop_est, funs(as.character))
-pop_est <- mutate_all(pop_est, funs(as.numeric))
-colnames(pop_est) <- c("mean", "ll", "ul")
-
-yup6 <- data.frame(n_sample, pop_est)			
-names(yup6)[1] <- "journal_abbrev"
-yup6$journal_abbrev <- factor(yup6$journal_abbrev, journal_abbrev)
-
-
-left_join(categories, yup6, by = c("journal_abbrev", "keyword"))
-
-
-
-
-for (i in seq(1, dim(categories)[1])){
-	### Extract loop characteristics
-	journal_i <- categories$journal_abbrev[i]
-	keyword_i <- categories$keyword[i]
-	n_i <- categories$n[i]
-	n_sampled_i <- categories$n_sampled_need[i]
-	n_unsampled_i <- categories$n_unsampled_need[i]
-	
-	### sampled
-	n_sample <- yup %>% filter(Q2_abbrev == journal_i & keyword == keyword_i)
-
-	yup3 <- capture.output(BMDE(n_sample$count,1))
-
-	pop_est <- data.frame(mean=strsplit(yup3[2], split=" "), ll=strsplit(yup3[4], split=" "), ul=strsplit(yup3[6], split=" "))
-
-	pop_est <- pop_est[seq(2,dim(pop_est)[1]),]
-	pop_est <- mutate_all(pop_est, funs(as.character))
-	pop_est <- mutate_all(pop_est, funs(as.numeric))
-	colnames(pop_est) <- c("mean", "ll", "ul")
-
-	yup6 <- data.frame(n_sample, pop_est)			
-	names(yup6)[1] <- "journal_abbrev"
-	yup6$journal_abbrev <- factor(yup6$journal_abbrev, journal_abbrev)
-
-	if (i == 1){
-		categories_yup <- yup6
-	} else {
-		categories_yup <- rbind(categories_yup, yup6)
-	}
-}
-
-uhhuh <- categories %>% 
-	select(journal_abbrev, keyword, n_unsampled_need) %>%
-	right_join(categories_yup)
-
-uhhuh2 <- uhhuh %>% 
-	mutate(mean_papers = n_unsampled_need * mean,
-		ll_papers = n_unsampled_need * ll,
-		ul_papers = n_unsampled_need * ul
-		)
-
-ggplot(uhhuh2, aes(x=journal_abbrev, group=final_determ, fill=final_determ, y=mean_papers)) + geom_bar(stat="identity")
-
-ggplot(uhhuh2, aes(x=journal_abbrev, group=final_determ, colour=final_determ, y=mean_papers, ymin=ll_papers, ymax=ul_papers)) + geom_pointrange()
-
-ggplot(uhhuh2, aes(x=journal_abbrev, group=final_determ, colour=final_determ, y=mean, ymin=ll, ymax=ul)) + geom_pointrange()
-
-ggplot(uhhuh2, aes(x=journal_abbrev, group=final_determ, colour=final_determ, y=mean, ymin=ll, ymax=ul))+geom_errorbar(na.rm=TRUE,position="dodge")
-
-### Because not doing keywords
-ggplot(uhhuh2, aes(x=final_determ, group=journal_abbrev, colour=journal_abbrev, y=mean, ymin=ll, ymax=ul))+geom_errorbar(na.rm=TRUE,position="dodge")
-
-
-
-   +geom_point(aes(shape=final_determ), na.rm=TRUE,position="dodge") 
-   
-   
-, position="dodge"
-
-
-
-###########################################################################
-## Loop and resample
-###########################################################################
-n_runs <- 5000
-
-start_time <- Sys.time()
-
-
-for (j in seq(1,n_runs)) {
-
-cat(paste0("j: ", j, "   of: ", n_runs, "\n"))
-
-for (i in seq(1, dim(categories)[1])){
-	### Extract loop characteristics
-	journal_i <- categories$journal_abbrev[i]
-	keyword_i <- categories$keyword[i]
-	n_i <- categories$n[i]
-	n_sampled_i <- categories$n_sampled_need[i]
-	n_unsampled_i <- categories$n_unsampled_need[i]
-	
-	### report progress
-	#cat(paste0("Journal: ", journal_i, "   Keyword: ", keyword_i, "\n"))
-	
-	### Subset papers
-	papers_i <- reproduc_df %>% 
-		filter(Q2_abbrev == journal_i & keyword == keyword_i)
-  
-	### Extract/resample for sampled papers
-	### Use sampling without replacement in case 
-	papers_sampled_df <- papers_i %>%
-		sample_n(size = n_sampled_i, replace = FALSE)
-
-	### Extract/resample unsampled papers
- 	papers_unsampled_df <- papers_i %>%
-		sample_n(size = n_unsampled_i, replace = TRUE)
- 
-	### Combine for the category
-	papers_temp <- rbind(papers_sampled_df, papers_unsampled_df)
-	rm(papers_sampled_df, papers_unsampled_df)
-
-	if (i == 1) {
-		papers_all <- papers_temp
-	} else {
-		papers_all <- rbind(papers_all, papers_temp)
-	}
-}
-
-### Check that it equals total n
-#assertthat
-
-### Run summary stats and return
-q6_temp <- papers_all %>% 
-	select(Q2_abbrev, Q6_grouping) %>%
-	group_by(Q2_abbrev, Q6_grouping) %>%
-	summarise(n=n()) 
-	
-q6_temp <- data.frame(sample=j, q6_temp)
-
-if (j == 1){
-	q6_resample <- q6_temp
-} else {
-	q6_resample <- rbind(q6_resample, q6_temp)
-}
-
-}
-
-
-end_time <- Sys.time()
-
-end_time - start_time
-
-
-
-
-
-
-
-q6_totals <- q6_resample %>%
-	group_by(sample, Q6_grouping) %>%
-	summarise(n = sum(n)) %>% 
-	mutate(Q2_abbrev = "Total") %>%
-	select(sample, Q2_abbrev, Q6_grouping, n) %>%
-	as.data.frame()
-
-q6_resample <- rbind(q6_resample, q6_totals)
-
-p <- ggplot(q6_resample, aes(x=Q2_abbrev, y=n, fill=Q6_grouping))
-p <- p + geom_boxplot(position="dodge")
-p <- p + theme_classic()
-p
-
-p <- ggplot(q6_resample, aes(x=Q2_abbrev, y=n, fill=Q6_grouping))
-p <- p + geom_bar(position="stack", stat = "summary", fun.y = "mean")
-p <- p + theme_classic()
-p
-
- geom_errorbar(aes(ymin = lower, ymax = upper), position = dodge, width = 0.25)
- 
-    
-yup <- q6_resample %>%
-	left_join(select(pub_summary_table, journal_abbrev, total), by=c("Q2_abbrev" = "journal_abbrev"))  %>%
-	mutate(propor = n/total)
-	
-p <- ggplot(subset(yup, Q6_grouping=="Some or All\nAvailable Online"), aes(x=propor, fill=Q2_abbrev))
-p <- p + geom_density()
-p <- p + scale_fill_manual(values=journal_colors)
-p <- p + theme_classic_new() 
-p
-
-p <- ggplot(yup, aes(x=propor, fill=Q2_abbrev))
-p <- p + geom_density(alpha=0.8)
-p <- p + facet_wrap(~Q6_grouping, ncol=1)
-p <- p + coord_cartesian(ylim=c(0,40))
-p <- p + scale_fill_manual(values=journal_colors)
-p <- p + theme_classic_new()
-p
-
-p <- ggplot(yup, aes(x=Q2_abbrev, y = propor, fill=Q2_abbrev))
-p <- p + geom_boxplot(position="dodge")
-p <- p + facet_wrap(~Q6_grouping, ncol=1)
-#p <- p + coord_cartesian(ylim=c(0,40))
-p <- p + scale_x_discrete(limits = rev(unique(yup$Q2_abbrev)))
-p <- p + coord_flip()
-p <- p + scale_fill_manual(values=journal_colors)
-p <- p + theme_classic_new()
-p
-
-
-p <- p + geom_bar(position="stack", stat = "summary", fun.y = "mean")
-p <- p + theme_classic()
-p	
-
-	
-	
-q6_resample %>%
-	group_by(Q2_abbrev, Q6_grouping) %>%
-	summarise(mean_something=mean(n)) 
-
-
-yup <- q6_resample %>%
-	group_by(Q2_abbrev, Q6_grouping) 
-	
-
-
-
-
-	
-	
-	
-	%>%
-	as.data.frame()
-	
-	
-	%>%
-	gather()
-	
-	spread(var, value)
-	
-	
-	key = flower_att, value = measurement,
-            Sepal.Length, Sepal.Width, Petal.Length, Petal.Width)
-            
-            
-            
-            
-	
-	
-}
-
-
-
-
-expand.grid(journal=pub_summary_table$journal_abbrev, keyword = c(TRUE, FALSE))
-
-
-
-reproduc_df
-pub_summary_table
-
-
+write.csv(yup_summary, file.path(write_output_path, "population_est.csv"))
 
 
 

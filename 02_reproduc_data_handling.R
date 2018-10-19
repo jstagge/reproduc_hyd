@@ -1,69 +1,38 @@
 # *------------------------------------------------------------------
-# | PROGRAM NAME: 03_ap_model_fit
-# | FILE NAME: 03_ap_model_fit.R
+# | PROGRAM NAME: 02_reproduc_data_handling
+# | FILE NAME: 02_reproduc_data_handling.R
 # | DATE: 
 # | CREATED BY:  Jim Stagge         
 # *----------------------------------------------------------------
-# | PURPOSE:  This is a code wrapper to fit the Annual Percentile (AP) model.
-# | It fits cumulative probability distributions for annual and monthly flows.
-# |
-# |
-# *------------------------------------------------------------------
-# | COMMENTS:               
-# |
-# |  1:  
-# |  2: 
-# |  3: 
-# |*------------------------------------------------------------------
-# | DATA USED:               
-# | USGS gauge flow data
-# | Annual reconstructions from:
-# | Allen, E.B., Rittenour, T.M., DeRose, R.J., Bekker, M.F., Kjelgren, R., Buckley, B.M., 2013. A tree-ring based reconstruction of Logan River streamflow, northern Utah. Water Resources Research 49, 8579–8588. doi:10.1002/2013WR014273.
-# |
-# | DeRose, R.J., Bekker, M.F., Wang, S.Y., Buckley, B.M., Kjelgren, R.K., Bardsley, T., Rittenour, T.M., Allen, E.B., 2015. A millennium-length reconstruction of Bear River stream flow, Utah. Journal of Hydrology 529, Part 2, 524–534. doi:10.1016/j.jhydrol.2015.01.014.
-# |
-# |*------------------------------------------------------------------
-# | CONTENTS:               
-# |
-# |  PART 1:  
-# |  PART 2: 
-# |  PART 3: 
-# *-----------------------------------------------------------------
-# | UPDATES:               
-# |
+# | PURPOSE:  This code performs all calculations on the results of the 
+# | reproducibility survey. It prepares the data to be plotted in the next
+# | code file.
 # |
 # *------------------------------------------------------------------
-
-### Clear any existing data or functions.
-rm(list=ls())
 
 ###########################################################################
 ## Set the Paths
 ###########################################################################
 ### Path for Data and Output	
-data_path <- "../../data"
-output_path <- "../../output"
-global_path <- "../global_func"
+data_path <- "./data"
+output_path <- "./output"
+global_path <- "./global_func"
 function_path <- "./functions"
 
 ### Set output location
-output_name <- "reproduc"
-write_output_base_path <- file.path(output_path, output_name)
+write_output_base_path <- output_path
 
 dir.create(write_output_base_path)
-
-### Set input location
-data_path<- file.path(data_path, "reproduc")
 
 ###########################################################################
 ###  Load functions
 ###########################################################################
 ### Load these functions for all code
-require(colorout)
+#require(colorout)
 require(assertthat)
 require(staggefuncs)
 require(tidyverse)
-require(colorblindr)
+#require(colorblindr)
 
 ### Load these functions for this unique project
 require(stringr)
@@ -78,7 +47,6 @@ sapply(file.path(function_path, file.sources),source)
 ### Load global functions
 file.sources = list.files(global_path, pattern="*.R", recursive=TRUE)
 sapply(file.path(global_path, file.sources),source)
-
 
 
 ###########################################################################
@@ -100,17 +68,10 @@ dir.create(file.path(write_figures_path,"svg"), recursive=TRUE)
 ###########################################################################
 ###  Read in Data
 ###########################################################################
-
 ### Read in reproducibility data
-read_location <- file.path(data_path, "Reproducibility_Results_edits.csv")
+read_location <- file.path(data_path, "survey_results/Reproducibility_Results_edits.csv")
 
 reproduc_df <- read.csv(file = read_location)
-
-### Consider trying the function str_clean()  from explarotaory packages to clean up \n and things like that
-
-### Can use this to pull out comma delimited data into separate rows
-#mutate(`Select Investors` = str_split(`Select Investors`, ", "))
-#unnest(`Select Investors`)
 
 ###########################################################################
 ###  Fix http in Q3
@@ -121,23 +82,21 @@ reproduc_df$Q3 <- str_replace(reproduc_df$Q3, "https://", "")
 reproduc_df$Q3 <- str_replace(reproduc_df$Q3, "doi.org/", "")
 reproduc_df$Q3 <- as.character(reproduc_df$Q3)
  
-
 ###########################################################################
 ###  Read in publication summary table
 ###########################################################################
-pub_summary_table <- read.csv(file.path(write_output_base_path, "articles/pub_summary_table.csv"))
+pub_summary_table <- read.csv(file.path(data_path, "article_analysis/pub_summary_table.csv"))
 
 ### Add  publication abbreviations to publication summary table
 pub_summary_table$journal_abbrev <- factor(pub_summary_table$journal_abbrev, levels=journal_abbrev)
-
 
 ###########################################################################
 ###  Add keywords
 ###########################################################################
 ### Read in Papers
-paper_assign <- read.csv(file.path(write_output_base_path, "articles/paper_assign.csv"))
-sampled_keywords <- read.csv(file.path(write_output_base_path, "articles/sampled_keywords.csv"))
-sampled_nonkeywords <- read.csv(file.path(write_output_base_path, "articles/sampled_nonkeywords.csv"))
+paper_assign <- read.csv(file.path(data_path, "article_analysis/paper_assign.csv"))
+sampled_keywords <- read.csv(file.path(data_path, "article_analysis/sampled_keywords.csv"))
+sampled_nonkeywords <- read.csv(file.path(data_path, "article_analysis/sampled_nonkeywords.csv"))
 
 head(sampled_nonkeywords)
 
@@ -169,9 +128,15 @@ check_df <- reproduc_df %>%
 missing_doi <- paper_assign_merge$DOI[!(paper_assign_merge$DOI %in% reproduc_df$Q3)]
 missing_papers <- paper_assign[paper_assign$DOI %in% missing_doi, ]
 
-### Output to csv
-write.csv(missing_papers, file.path(write_output_base_path, "missing_papers.csv"))
+### View papers that were not reviewed
+missing_papers
 
+### Generate output path
+write_output_path <- file.path(write_output_base_path, "survey_analysis")
+dir.create(write_output_path)
+
+### Output to csv
+write.csv(missing_papers, file.path(write_output_path, "missing_papers.csv"))
 
 ###########################################################################
 ###  Separate into availability only and reproducibility 
@@ -207,7 +172,7 @@ duplicate_reproduc <- reproduc_only %>%
 duplicate_df <- rbind(duplicate_avail, duplicate_reproduc)
 
 ### Output to csv
-write.csv(duplicate_df, file.path(write_output_base_path, "duplicates_by_number.csv"))
+write.csv(duplicate_df, file.path(write_output_path, "duplicates_by_index.csv"))
 
 ### Remove individual dataframes
 rm(duplicate_avail)
@@ -217,7 +182,7 @@ duplicate_full <- reproduc_df[reproduc_df$Q3 %in% duplicate_df$Q3,] %>%
 	arrange(Q3)
 
 ### Output to csv
-write.csv(duplicate_full, file.path(write_output_base_path, "duplicates_full.csv"))
+write.csv(duplicate_full, file.path(write_output_path, "duplicates_full.csv"))
 
 
 ###########################################################################
@@ -300,10 +265,6 @@ q6_journal_perc  <- q6_journal_count %>%
   	mutate(author = author/n, article = article/n, third = third/n, some=some/n, none=none/n) %>%
   	dplyr::select(-n)
 
-### Output to csv
-write.csv(q6_journal_count, file.path(write_output_base_path, "q6_journal_count.csv"))
-write.csv(q6_journal_perc, file.path(write_output_base_path, "q6_journal_perc.csv"))
-
 ### Create rules for how to classify Q6
 q6_df$Q6_grouping <- NA
 q6_df$Q6_grouping[q6_df$article == TRUE] <- "Only In\nArticle"
@@ -316,21 +277,6 @@ q6_df$Q6_grouping[q6_df$none == TRUE] <- "None"
 ### Put back into reproducability df
 reproduc_df$Q6_grouping <- q6_df$Q6_grouping
 reproduc_df$Q6_grouping <- factor(reproduc_df$Q6_grouping, levels=q6_labels)
-
-### Data prep
-#reproduc_df$Q6_grouping <- "No"
-### If it contains Author Request at all
-#reproduc_df$Q6_grouping[str_detect(reproduc_df$Q6, "Author")] <- "Author\nRequest"
-### If it contains Tin article at all
-#reproduc_df$Q6_grouping[str_detect(reproduc_df$Q6, "figures/tables")] <- "In\nArticle"
-### If it contains Third Party Request at all (trumps Author Request)
-#reproduc_df$Q6_grouping[str_detect(reproduc_df$Q6, "Third Party")] <- "Third\nParty"
-### If available in paper
-#reproduc_df$Q6_grouping[str_detect(reproduc_df$Q6, "online")] <- "Some or\nAll Available"
-
-#reproduc_df$Q6_grouping <- factor(reproduc_df$Q6_grouping, levels=q6_labels)
-
-
 
 ###########################################################################
 ###  Process Q7 - "Available Components"
@@ -529,6 +475,6 @@ q13_journal_perc  <- q13_journal_count %>%
 ###########################################################################
 ###  Save progress
 ###########################################################################
-save(reproduc_df, pub_summary_table, q6_labels, q6_journal_perc, q6_journal_count, q7_journal_perc, q7_journal_count, q9_labels, q11_labels, q13_labels, q13_journal_count, q13_journal_perc, file=file.path(write_output_base_path, "reproduc_data.rda"))
+save(reproduc_df, pub_summary_table, q6_labels, q6_journal_perc, q6_journal_count, q7_journal_perc, q7_journal_count, q9_labels, q11_labels, q13_labels, q13_journal_count, q13_journal_perc, file=file.path(write_output_path, "reproduc_data.rda"))
 
 
