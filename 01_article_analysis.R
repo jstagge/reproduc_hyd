@@ -23,7 +23,7 @@ function_path <- "./functions"
 ### Set output location
 write_output_base_path <- output_path
 
-dir.create(write_output_base_path)
+dir.create(write_output_base_path, showWarnings = FALSE)
 
 ###########################################################################
 ###  Load functions
@@ -102,7 +102,7 @@ tag_sort <- tags_table$Var1[order(tags_table$Freq, decreasing=TRUE)]
 ###########################################################################
 ### Create output path
 write_output_path <- file.path(write_output_base_path, "article_analysis")
-dir.create(write_output_path)
+dir.create(write_output_path, showWarnings = FALSE)
 
 ### Set journal colors
 journal_colors <- cb_pal(6)
@@ -293,7 +293,7 @@ sample_nonkeyword <- sort(sample_nonkeyword)
 ### exactly with the randomly sampled articles in the paper
 ### Create output path
 write_output_path <- file.path(write_output_base_path, "article_analysis_github")
-dir.create(write_output_path)
+dir.create(write_output_path, showWarnings = FALSE)
 
 ### Output indices of keyword papers
 write.csv( index_all, file.path(write_output_path,"sampled_keywords_github.csv"))

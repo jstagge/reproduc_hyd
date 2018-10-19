@@ -22,7 +22,7 @@ function_path <- "./functions"
 ### Set output location
 write_output_base_path <- output_path
 
-dir.create(write_output_base_path)
+dir.create(write_output_base_path, showWarnings = FALSE)
 
 ###########################################################################
 ###  Load functions
@@ -60,10 +60,13 @@ journal_colors <- cb_pal("custom", n=6, sort=FALSE)
 ## Set Additional Output Folders
 ###########################################################################
 ### Set up output folders
-write_figures_path <- file.path(write_output_base_path, "figures")
-dir.create(file.path(write_figures_path,"png"), recursive=TRUE)
-dir.create(file.path(write_figures_path,"pdf"), recursive=TRUE)
-dir.create(file.path(write_figures_path,"svg"), recursive=TRUE)
+### Set up output folders
+write_figures_path <- file.path(write_output_base_path, "all_figures")
+dir.create(write_figures_path, recursive=TRUE, showWarnings = FALSE)
+
+### Set up output folders
+write_pub_path <- file.path(write_output_base_path, "publication")
+dir.create(write_pub_path, recursive=TRUE, showWarnings = FALSE)
 
 ###########################################################################
 ###  Read in Data
@@ -85,7 +88,7 @@ reproduc_df$Q3 <- as.character(reproduc_df$Q3)
 ###########################################################################
 ###  Read in publication summary table
 ###########################################################################
-pub_summary_table <- read.csv(file.path(data_path, "article_analysis/pub_summary_table.csv"))
+pub_summary_table <- read.csv(file.path(output_path, "article_analysis/pub_summary_table.csv"))
 
 ### Add  publication abbreviations to publication summary table
 pub_summary_table$journal_abbrev <- factor(pub_summary_table$journal_abbrev, levels=journal_abbrev)
@@ -118,6 +121,7 @@ sum(dup_doi)
 rm(dup_doi)
 
 ### Merge back with reproduc_df to add keyword column
+paper_assign_merge$DOI <- as.character(paper_assign_merge$DOI)
 reproduc_df <- reproduc_df %>%
 	left_join(paper_assign_merge, by = c("Q3" = "DOI"))
 	
@@ -133,7 +137,7 @@ missing_papers
 
 ### Generate output path
 write_output_path <- file.path(write_output_base_path, "survey_analysis")
-dir.create(write_output_path)
+dir.create(write_output_path, showWarnings = FALSE)
 
 ### Output to csv
 write.csv(missing_papers, file.path(write_output_path, "missing_papers.csv"))
@@ -476,5 +480,4 @@ q13_journal_perc  <- q13_journal_count %>%
 ###  Save progress
 ###########################################################################
 save(reproduc_df, pub_summary_table, q6_labels, q6_journal_perc, q6_journal_count, q7_journal_perc, q7_journal_count, q9_labels, q11_labels, q13_labels, q13_journal_count, q13_journal_perc, file=file.path(write_output_path, "reproduc_data.rda"))
-
 

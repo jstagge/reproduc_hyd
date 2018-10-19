@@ -16,13 +16,13 @@
 ### Path for Data and Output	
 data_path <- "./data"
 output_path <- "./output"
+
 global_path <- "./global_func"
 function_path <- "./functions"
 
 ### Set output location
 write_output_base_path <- output_path
-
-dir.create(write_output_base_path)
+dir.create(write_output_base_path, showWarnings = FALSE)
 
 
 ###########################################################################
@@ -63,12 +63,12 @@ journal_colors <- cb_pal("custom", n=6, sort=FALSE)
 ## Set Additional Output Folders
 ###########################################################################
 ### Set up output folders
-write_figures_path <- file.path(write_output_base_path, "figures")
-dir.create(write_figures_path, recursive=TRUE)
+write_figures_path <- file.path(write_output_base_path, "all_figures")
+dir.create(write_figures_path, recursive=TRUE, showWarnings = FALSE)
 
 ### Set up output folders
-write_pub_path <- file.path(write_figures_path, "publication")
-dir.create(write_figures_path, recursive=TRUE)
+write_pub_path <- file.path(write_output_base_path, "publication")
+dir.create(write_pub_path, recursive=TRUE, showWarnings = FALSE)
 
 ###########################################################################
 ## Load data
@@ -94,7 +94,7 @@ reproduc_df$Q2_abbrev <- factor(reproduc_df$Q2_abbrev, levels=c("EM&S", "HESS", 
 ###########################################################################
 ### Set up output folders
 write_output_path <- file.path(write_figures_path, "articles")
-dir.create(write_output_path, recursive=TRUE)
+dir.create(write_output_path, recursive=TRUE, showWarnings = FALSE)
 
 ### Summarize articles sampled
 plot_articles_sample <- reproduc_df %>%
@@ -202,7 +202,8 @@ journal_colors_black
   p <- p + theme_classic_new(9.5) +   theme(legend.position="none")
   p 
 
-  #cvd_grid(p)
+
+#cvd_grid(p)
 
 ### Save figure
 ggsave(file.path(write_output_path, "article_keyword_by_journal_color.png"), p, width=5, height=3, dpi=600)
@@ -276,8 +277,6 @@ ggsave(file.path(write_output_path, "article_keyword_by_journal_combined_color.p
 
 #cvd_grid(p)
 
-
-
 journal_colors_black <- rep("grey60", each=4*6)
 journal_colors_black[seq(1, length(journal_colors_black), 4)] <- "grey20"
 journal_colors_black[seq(3, length(journal_colors_black), 4)] <- "grey20"
@@ -306,7 +305,7 @@ ggsave(file.path(write_output_path, "article_keyword_by_journal_combined_bw.pdf"
 ###########################################################################
 ### Set up output folders
 write_output_path <- file.path(write_figures_path, "availability")
-dir.create(write_output_path, recursive=TRUE)
+dir.create(write_output_path, recursive=TRUE, showWarnings = FALSE)
 
 
 avail_journal <- reproduc_df %>% 
@@ -358,7 +357,9 @@ ggsave(file.path(write_output_path, "q5_bw.pdf"), p, width=5, height=3.25)
   p <- p + theme_classic_new(9.5) +   theme(legend.position="bottom")
   p 
   
-  #cvd_grid(p)
+
+#cvd_grid(p)
+
 ### Save figure
 ggsave(file.path(write_output_path, "q5_stack_colors.png"), p, width=5, height=3.25, dpi=600)
 ggsave(file.path(write_output_path, "q5_stack_colors.svg"), p, width=5, height=3.25)
@@ -393,6 +394,7 @@ p <- p + scale_x_discrete(name="Where Available (Q6)")
 p <- p + scale_fill_manual(name="Journal", values=journal_colors) 
 p <- p + theme_classic_new(9.5) +   theme(legend.position="bottom") + guides(fill = guide_legend(nrow = 1))
 p 	
+
 
 #cvd_grid(p)
 
@@ -484,6 +486,15 @@ ggsave(file.path(write_output_path, "q5_q6_combined_byavail_bar.svg"), p,  width
 ggsave(file.path(write_output_path, "q5_q6_combined_byavail_bar.pdf"), p,  width=5.5, height=4)
 
 
+###########################################################################
+###  Save Figure 3 from Publication
+###########################################################################
+ggsave(file.path(write_pub_path, "Fig_3.png"), p,  width=5.5, height=4, dpi=600)
+ggsave(file.path(write_pub_path, "Fig_3.svg"), p,  width=5.5, height=4)
+ggsave(file.path(write_pub_path, "Fig_3.pdf"), p,  width=5.5, height=4)
+
+
+
   p <- ggplot(data = plot_Q5_6, aes(x = Q5_6, y = prop_by_journal, fill = Q2_abbrev)) 
   p <- p + geom_bar(stat = 'identity', width=0.8, position = position_dodge(width=0.8))
   p <- p + scale_y_continuous(name="Proportion of Articles", labels = scales::percent, expand = c(0, 0), limits = c(0, 0.7))
@@ -525,7 +536,7 @@ ggsave(file.path(write_output_path, "q5_q6_combined_byavail_stacked.pdf"), p,  w
 ###########################################################################
 ### Set up output folders
 write_output_path <- file.path(write_figures_path, "artifacts")
-dir.create(write_output_path, recursive=TRUE)
+dir.create(write_output_path, recursive=TRUE, showWarnings = FALSE)
 
 ### Create dataframe for Q7
 plot_q7 <- q7_journal_perc%>%
@@ -570,6 +581,15 @@ ggsave(file.path(write_output_path, "q7_by_journal.png"), p,  width=5.5, height=
 ggsave(file.path(write_output_path, "q7_by_journal.svg"), p,  width=5.5, height=3.85)
 ggsave(file.path(write_output_path, "q7_by_journal.pdf"), p,  width=5.5, height=3.85)
 
+###########################################################################
+###  Save Figure 4 from Publication
+###########################################################################
+ggsave(file.path(write_pub_path, "Fig_4.png"), p,  width=5.5, height=3.85, dpi=600)
+ggsave(file.path(write_pub_path, "Fig_4.svg"), p,  width=5.5, height=3.85)
+ggsave(file.path(write_pub_path, "Fig_4.pdf"), p,  width=5.5, height=3.85)
+
+
+
 p <- ggplot(subset(plot_q7, source != "None"), aes(x=Q2_abbrev, y=value, fill=source))
 p <- p + geom_bar(stat = 'identity', width=0.75, position = position_dodge(width=0.75))
 p <- p + scale_y_continuous(name="Proportion of Articles", labels = scales::percent, expand = c(0, 0), limits = c(0, 0.5))
@@ -579,6 +599,7 @@ p <- p + theme_classic_new(9.5) +   theme(legend.position="bottom")
 p 	
 
 #cvd_grid(p)
+
 #c("#d53e4f","#f46d43","#fdae61", "#3288bd", "#66c2a5", "#abdda4", "#e6f598")
 #c("#e31a1c", "#ff7f00", "#6a3d9a", "#a6cee3","#1f78b4","#b2df8a","#33a02c")
 
@@ -622,7 +643,7 @@ ggsave(file.path(write_output_path, "q7_allsurveyed_color.pdf"), p,  width=5.5, 
 ###########################################################################
 ### Set up output folders
 write_output_path <- file.path(write_figures_path, "replicability")
-dir.create(write_output_path, recursive=TRUE)
+dir.create(write_output_path, recursive=TRUE, showWarnings = FALSE)
 
 plot_q11 <- reproduc_df%>%
   	 filter(rep_avail_clean =="repro") %>%
@@ -707,7 +728,7 @@ prop.test(x = c(5,1), n=c(119, 241), p = NULL, alternative = "greater", correct 
 ################ 
 ### Set up output folders
 write_output_path <- file.path(write_figures_path, "time_spent")
-dir.create(write_output_path, recursive=TRUE)
+dir.create(write_output_path, recursive=TRUE, showWarnings = FALSE)
 
 
 reproduc_df$stopping_point <- "Availability"
@@ -753,6 +774,15 @@ p
 ggsave(file.path(write_output_path, "q12_violin.png"), p,  width=4.5, height=3, dpi=600)
 ggsave(file.path(write_output_path, "q12_violin.svg"), p,  width=4.5, height=3)
 ggsave(file.path(write_output_path, "q12_violin.pdf"), p,  width=4.5, height=3)
+
+###########################################################################
+###  Save Figure 3 from Publication
+###########################################################################
+ggsave(file.path(write_pub_path, "Fig_6.png"), p,   width=4.5, height=3, dpi=600)
+ggsave(file.path(write_pub_path, "Fig_6.svg"), p,   width=4.5, height=3)
+ggsave(file.path(write_pub_path, "Fig_6.pdf"), p,   width=4.5, height=3)
+
+
 
 p <- ggplot(reproduc_df, aes(x=Q12))
 p <- p + geom_histogram(binwidth=5)
@@ -989,7 +1019,7 @@ plot( river, default_style= style , yscale=1, fix.pdf=TRUE)
 
 ### Set up output folders and file
 write_output_path <- file.path(write_figures_path, "river_plot")
-dir.create(write_output_path, recursive=TRUE)
+dir.create(write_output_path, recursive=TRUE, showWarnings = FALSE)
 river_file <- file.path(write_output_path, "papers_riverplot")
 
 png(paste0(river_file, '.png'), width = 13, height = 9, units = 'in', res = 300)
@@ -1004,15 +1034,32 @@ pdf(paste0(river_file, '.pdf'), width = 13, height = 9)#, units = 'in')#, res = 
 plot( river, default_style= style , yscale=1, fix.pdf=TRUE)
 dev.off()
 
+###########################################################################
+###  Save Figure 2 from Publication
+###########################################################################
+river_file <- file.path(write_pub_path, "Fig_2")
 
+png(paste0(river_file, '.png'), width = 13, height = 9, units = 'in', res = 300)
+plot( river, default_style= style , yscale=1, fix.pdf=TRUE)
+dev.off()
+
+svg(paste0(river_file, '.svg'), width = 13, height = 9)#, units = 'in')#, res = 300)
+plot( river, default_style= style , yscale=1, fix.pdf=TRUE)
+dev.off()
+
+pdf(paste0(river_file, '.pdf'), width = 13, height = 9)#, units = 'in')#, res = 300)
+plot( river, default_style= style , yscale=1, fix.pdf=TRUE)
+dev.off()
+
+
+
+################################
+###  Save riverplot data and revised reproduc_df
+#################################
 ### Output to csv
 write.csv(paper_edges, file.path(write_output_path, "paper_edges.csv"))
 write.csv(paper_nodes, file.path(write_output_path, "paper_nodes.csv"))
 
-
-################################
-###  Save revised reproduc_df
-#################################
 ### Save revised reproduc_df
 saveRDS(reproduc_df, file = file.path(write_output_base_path, "reproduc_df.rds"))
 

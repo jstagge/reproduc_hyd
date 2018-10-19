@@ -22,7 +22,7 @@ function_path <- "./functions"
 ### Set output location
 write_output_base_path <- output_path
 
-dir.create(write_output_base_path)
+dir.create(write_output_base_path, showWarnings = FALSE)
 
 ###########################################################################
 ###  Load functions
@@ -61,9 +61,13 @@ journal_colors <- cb_pal("custom", n=6, sort=FALSE)
 ## Set Additional Output Folders
 ###########################################################################
 ### Set up output folders
-write_figures_path <- file.path(write_output_base_path, "figures")
+write_figures_path <- file.path(write_output_base_path, "all_figures")
 write_output_path <- file.path(write_figures_path, "population_estimate")
-dir.create(write_output_path, recursive=TRUE)
+dir.create(write_output_path, recursive=TRUE, showWarnings = FALSE)
+
+### Set up output folders
+write_pub_path <- file.path(write_output_base_path, "publication_figures")
+dir.create(write_pub_path, recursive=TRUE, showWarnings = FALSE)
 
 ###########################################################################
 ## Load data
@@ -290,6 +294,15 @@ ggsave(file.path(write_output_path, "pop_horizontal.svg"), p,  width=7, height=4
 ggsave(file.path(write_output_path, "pop_horizontal.pdf"), p,  width=7, height=4)
 
 
+###########################################################################
+###  Save Figure 5 from Publication
+###########################################################################
+ggsave(file.path(write_pub_path, "Fig_5.png"), p,  width=7, height=4, dpi=600)
+ggsave(file.path(write_pub_path, "Fig_5.svg"), p,  width=7, height=4, dpi=600)
+ggsave(file.path(write_pub_path, "Fig_5.pdf"), p,  width=7, height=4, dpi=600)
+
+
+
 ### Plot it vertically
 p <- ggplot(paper_summary_all_sims, aes(x = final_determ, group=Q2_abbrev, colour=Q2_abbrev)) %>%
 	+ geom_pointrange(aes(y=median, ymin = ll, ymax = ul), position = position_dodge(width = -0.4), size=.75) %>%
@@ -309,7 +322,5 @@ ggsave(file.path(write_output_path, "pop_vertical.pdf"), p,  width=4.2, height=6
 
 
 ### Output to csv
-write.csv(yup_summary, file.path(write_output_path, "population_est.csv"))
-
-
+write.csv(paper_summary_all_sims, file.path(write_output_path, "population_est.csv"))
 

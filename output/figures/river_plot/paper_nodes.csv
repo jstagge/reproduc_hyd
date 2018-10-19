@@ -1,0 +1,32 @@
+"","ID","x","y","labels","col"
+"Q0_1","Q0_1",1,400,"All
+papers
+[360]","#4477AA"
+"Q5_1","Q5_1",2,0,"Dataless
+or review [34]","#EFE8B6"
+"Q5_2","Q5_2",2,150,"Not specified
+where [73]","#EFE8B6"
+"Q5_3","Q5_3",2,453.5,"Some
+availability [253]","#4477AA"
+"Q6_1","Q6_1",3,100,"Contact
+third party [10]","#EFE8B6"
+"Q6_2","Q6_2",3,250,"Contact
+first author [68]","#EFE8B6"
+"Q6_3","Q6_3",3,492.5,"Some
+online [175]","#4477AA"
+"Q7_1","Q7_1",4,150,"No primary
+artifacts [51]","#EFE8B6"
+"Q7_2","Q7_2",4,275,"1 of 3 primary
+artifacts [80]","#EFE8B6"
+"Q7_3","Q7_3",4,400,"2 of 3 primary
+artifacts [24]","#EFE8B6"
+"Q7_4","Q7_4",4,570.5,"Directions, code
+& data [20]","#4477AA"
+"Q11_1","Q11_1",5,200,"Availability
+failure [10]","#EFE8B6"
+"Q11_2","Q11_2",5,300,"Not replicable
+[4]","#EFE8B6"
+"Q11_3","Q11_3",5,475,"Some replicable
+[4]","#4477AA"
+"Q11_4","Q11_4",5,579,"Fully replicable
+[2]","#4477AA"

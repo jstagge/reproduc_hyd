@@ -27,7 +27,6 @@ install.packages("tspmeta")
 install.packages("svglite")
 install.packages("MultinomialCI")
 install.packages("ggsci")
-
 ### Packages from GitHub
 install.packages("devtools")
 require(devtools)
