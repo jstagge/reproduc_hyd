@@ -329,3 +329,11 @@ paper_assign <- with(paper_assign, paper_assign[order(Reviewer, index),])
 write.csv(paper_assign, file.path(write_output_path,"paper_assign_github.csv"), row.names=FALSE)
 
 
+
+
+###########################################################################
+###  Print a Completion message
+###########################################################################
+print('===========================================================')
+print('Done. Next execute the 02_reproduc_data_handling.R file') 
+print('===========================================================')

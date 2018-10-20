@@ -65,7 +65,7 @@ write_figures_path <- file.path(write_output_base_path, "all_figures")
 dir.create(write_figures_path, recursive=TRUE, showWarnings = FALSE)
 
 ### Set up output folders
-write_pub_path <- file.path(write_output_base_path, "publication")
+write_pub_path <- file.path(write_output_base_path, "publication_figures")
 dir.create(write_pub_path, recursive=TRUE, showWarnings = FALSE)
 
 ###########################################################################
@@ -480,4 +480,14 @@ q13_journal_perc  <- q13_journal_count %>%
 ###  Save progress
 ###########################################################################
 save(reproduc_df, pub_summary_table, q6_labels, q6_journal_perc, q6_journal_count, q7_journal_perc, q7_journal_count, q9_labels, q11_labels, q13_labels, q13_journal_count, q13_journal_perc, file=file.path(write_output_path, "reproduc_data.rda"))
+
+
+
+
+###########################################################################
+###  Print a Completion message
+###########################################################################
+print('===========================================================')
+print('Done. Next execute the 03_reproduc_figs.R file') 
+print('===========================================================')
 

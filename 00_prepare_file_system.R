@@ -35,3 +35,11 @@ require(devtools)
 #install_github("jalvesaq/colorout")
 install_github("jstagge/staggefuncs")
 
+###########################################################################
+###  Print a Completion message
+###########################################################################
+print('===========================================================')
+print('Done. Next execute the 01_article_analysis.R file') 
+print('===========================================================')
+
+

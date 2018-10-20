@@ -324,3 +324,11 @@ ggsave(file.path(write_output_path, "pop_vertical.pdf"), p,  width=4.2, height=6
 ### Output to csv
 write.csv(paper_summary_all_sims, file.path(write_output_path, "population_est.csv"))
 
+
+
+###########################################################################
+###  Print a Completion message
+###########################################################################
+print('===========================================================')
+print('Done. All products should be replicated in the Output folder.') 
+print('===========================================================')
