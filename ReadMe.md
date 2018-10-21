@@ -1,15 +1,11 @@
 # Reproducibility in Hydrology
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1467693.svg)](https://doi.org/10.5281/zenodo.1467693)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1467417.svg)](https://doi.org/10.5281/zenodo.1467417)
 
-This repository contains code associated with paper, entitled, 'A novel replicability survey tool to measure and promote reproducibility in hydrology'. When run, it will replicate the results published in [Stagge et al. 2018](). It is provided here for transparency and so that other users may benefit from its underlying code. Please cite both the paper and this repository if you make use of any part of this.
+This repository contains code associated with paper, entitled, 'A novel replicability survey tool to measure and promote reproducibility in hydrology'. When run, it will replicate the results published in Stagge et al. (2018, in review). It is provided here for transparency and so that other users may benefit from its underlying code. Please cite both the paper and this repository if you make use of any part of this.
 
 ## Access or edit the survey tool  
 The survey flowchart, the online live survey, and the survey form are availabe [here](https://github.com/jstagge/reproduc_hyd/blob/master/assets/Survey_files.md)   
-
-<div style="text-align:center">
-<img src="https://github.com/jstagge/reproduc_hyd/blob/master/assets/Reproducibility_FlowChart.png" alt="Reproducibility survey flow chart" height="500">
-</div>
 
 ## Getting Started
 
@@ -39,9 +35,11 @@ All necesary R packages will be installed automatically in the first file.
 
 ## Running the Code
 
+First, make sure to set the working directory to the downloaded and unzipped folder.  
+
 ### Running all scripts at once
 
-Code is numbered based on the order of operations.  If you would like to simply recreate the results of [Stagge et al. (2018](http://), you may run the following from any command line after installing R. For more detailed information about each file, see below:
+Code is numbered based on the order of operations.  If you would like to simply recreate the results of Stagge et al. (2018, in review), you may run the following from any command line after installing R. For more detailed information about each file, see below:
 
 ```
 Rscript 00_prepare_file_system.R
