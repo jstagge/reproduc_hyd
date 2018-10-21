@@ -96,6 +96,6 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 ## Acknowledgments   
 This material is based upon work supported by Utah Mineral Lease Funds, the National Science Foundation, funded through OIA – 1208732, and the U.S. Fullbright Program. Any opinions, findings, and conclusions or recommendations expressed in this material are those of the author(s) and do not necessarily reflect the views of any of the funding organizations. 
 
-The authors thank Amber S Jones for providing feedback on an early draft and Ayman Alafifi for participation in early discussions to develop the survey tool. We would also like to thank Stephen Maldonado and Marcos Miranda for external review of the repository.
+The authors thank Amber S Jones for providing feedback on an early draft, Stephen Maldonado and Marcos Miranda for external review of the code repository, and Ayman Alafifi for participation in early discussions to develop the survey tool. 
 
 
