@@ -82,9 +82,10 @@ Rscript 04_pop_estimate.R
 
 For any description of this methodology, please use the following citation (s):
 
-* Stagge, J.H., Rosenberg, D.E., Abdallah, A., Akbar, A., Attallah, N., and James, R. (In review) "A novel replicability survey tool to measure and promote reproducibility in hydrology." Scientific Data.
+* Stagge, J.H., Rosenberg, D.E., Abdallah, A.M., Akbar, A., Attallah, N., and James, R. (In review) "A novel replicability survey tool to measure and promote reproducibility in hydrology." Scientific Data.
 
-* Stagge, J.H. (2018) "Reproducibility analysis repository accompanying Stagge et al. (2018)." doi: 10.5281/zenodo.1467417
+* Stagge, J.H., Abdallah, A.M., and Rosenberg, D.E. (2018) "jstagge/reproduc_hyd: Source code accompanying "A novel replicability survey tool to measure and promote reproducibility in hydrology" doi: 10.5281/zenodo.1467417
+
 
 ## Authors
 
