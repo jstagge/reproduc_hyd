@@ -330,5 +330,5 @@ write.csv(paper_summary_all_sims, file.path(write_output_path, "population_est.c
 ###  Print a Completion message
 ###########################################################################
 print('===========================================================')
-print('Done. All products should be replicated in the Output folder.') 
+print('Done. All products are now replicated in the Output folder.') 
 print('===========================================================')
