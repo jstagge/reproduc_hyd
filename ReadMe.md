@@ -79,6 +79,7 @@ Rscript 04_pop_estimate.R
 
 [Preprint manuscript file](https://github.com/jstagge/reproduc_hyd/blob/master/assets/stagge_et_al_reproducibility_preprint.pdf) with all text, figures, tables, etc. submitted to Scientific Data.
 
+Please note, this publication is currently under review and is presented here only as reference for the code repository. As per the policies of Scientific Data, this work is subject to press embargo until published.
 
 ## Reference and How to Cite
 
