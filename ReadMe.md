@@ -75,6 +75,10 @@ The final code file creates a estimate for all articles published in these journ
 ```
 Rscript 04_pop_estimate.R
 ```
+## Preprint
+
+stagge_et_al_reproducibility_submitted_version.pdf - Manuscript file with all text, figures, tables, etc. submitted to Scientific Data.
+
 
 ## Reference and How to Cite
 
