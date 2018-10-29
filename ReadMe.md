@@ -50,7 +50,7 @@ Rscript 04_pop_estimate.R
 ```
 
 ### Running scripts step-by-step
-The following file prepares the file system, installing any necesary packages and creating folders for model output.
+The following file prepares the file system, installing any necesary packages and creating folders for model output. 
 
 If you're using the cloud option, skip this step.  
 ```
@@ -75,6 +75,10 @@ The final code file creates a estimate for all articles published in these journ
 ```
 Rscript 04_pop_estimate.R
 ```
+**Results**     
+After you run the scripts above, look into a new generated folder called "Output". Then open the sub-folder inside it called "publication_figures which will contain the figures 2,3,4, and 6 as reported in the paper.   
+
+
 ## Preprint
 
 [Preprint manuscript file](https://github.com/jstagge/reproduc_hyd/blob/master/assets/stagge_et_al_reproducibility_preprint.pdf) with all text, figures, tables, etc. submitted to Scientific Data.
