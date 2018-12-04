@@ -56,6 +56,8 @@ sapply(file.path(global_path, file.sources),source)
 
 journal_abbrev <- c("EM&S", "HESS", "JoH", "JAWRA", "JWRP&M", "WRR")
 journal_colors <- cb_pal("custom", n=6, sort=FALSE)
+### Re-sort to match Fig 4
+journal_colors <- journal_colors[c(1, 2, 6, 5, 4, 3)]
 
 ###########################################################################
 ## Set Additional Output Folders

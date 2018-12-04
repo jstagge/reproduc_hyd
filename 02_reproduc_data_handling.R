@@ -394,7 +394,7 @@ ggplot(subset(reproduc_df, rep_avail != "repro"), aes(x=Q9)) + geom_bar()
 
 
 ###########################################################################
-###  Process Q11 - "Replicability Determination"
+###  Process Q11 - "Reproducibility Determination"
 ###########################################################################
 ### Separate Q11    
 q11_reframe <- as.character(reproduc_df$Q11)

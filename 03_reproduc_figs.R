@@ -486,14 +486,6 @@ ggsave(file.path(write_output_path, "q5_q6_combined_byavail_bar.svg"), p,  width
 ggsave(file.path(write_output_path, "q5_q6_combined_byavail_bar.pdf"), p,  width=5.5, height=4)
 
 
-###########################################################################
-###  Save Figure 3 from Publication
-###########################################################################
-ggsave(file.path(write_pub_path, "Fig_3.png"), p,  width=5.5, height=4, dpi=600)
-ggsave(file.path(write_pub_path, "Fig_3.svg"), p,  width=5.5, height=4)
-ggsave(file.path(write_pub_path, "Fig_3.pdf"), p,  width=5.5, height=4)
-
-
 
   p <- ggplot(data = plot_Q5_6, aes(x = Q5_6, y = prop_by_journal, fill = Q2_abbrev)) 
   p <- p + geom_bar(stat = 'identity', width=0.8, position = position_dodge(width=0.8))
@@ -529,6 +521,15 @@ plot_Q5_6$Q5_6 <- factor(plot_Q5_6$Q5_6, levels= c("Dataless or review","No avai
 ggsave(file.path(write_output_path, "q5_q6_combined_byavail_stacked.png"), p,  width=5.5, height=4, dpi=600)
 ggsave(file.path(write_output_path, "q5_q6_combined_byavail_stacked.svg"), p,  width=5.5, height=4)
 ggsave(file.path(write_output_path, "q5_q6_combined_byavail_stacked.pdf"), p,  width=5.5, height=4)
+
+
+###########################################################################
+###  Save Figure 3 from Publication
+###########################################################################
+ggsave(file.path(write_pub_path, "Fig_3.png"), p,  width=5.5, height=4, dpi=600)
+ggsave(file.path(write_pub_path, "Fig_3.svg"), p,  width=5.5, height=4)
+ggsave(file.path(write_pub_path, "Fig_3.pdf"), p,  width=5.5, height=4)
+
 
 
 ###########################################################################
@@ -639,10 +640,10 @@ ggsave(file.path(write_output_path, "q7_allsurveyed_color.svg"), p,  width=5.5, 
 ggsave(file.path(write_output_path, "q7_allsurveyed_color.pdf"), p,  width=5.5, height=3)
 
 ###########################################################################
-###  Plot Replicability (Q11)
+###  Plot Reproducibility (Q11)
 ###########################################################################
 ### Set up output folders
-write_output_path <- file.path(write_figures_path, "replicability")
+write_output_path <- file.path(write_figures_path, "reproducibility")
 dir.create(write_output_path, recursive=TRUE, showWarnings = FALSE)
 
 plot_q11 <- reproduc_df%>%
@@ -665,8 +666,8 @@ repro_colors <- repro_colors[c(1,4,3,2)]
   p <- ggplot(data = plot_q11, aes(x = Q11, y = n, fill = Q11)) 
   p <- p + geom_bar(stat = 'identity', width=0.8, position = position_dodge(width=0.8))
   p <- p + scale_y_continuous(name="Number of Articles", expand = c(0, 0), limits = c(0, 11), breaks=seq(0,20,2))
-  p <- p + scale_x_discrete(name="Replicability Determination (Q11)")
-  p <- p + scale_fill_manual(name="Replicability Determination (Q11)", values=repro_colors)#, limits=levels(avail_journal$Q5_leading)) 
+  p <- p + scale_x_discrete(name="Reproducibility Determination (Q11)")
+  p <- p + scale_fill_manual(name="Reproducibility Determination (Q11)", values=repro_colors)#, limits=levels(avail_journal$Q5_leading)) 
   p <- p + theme_classic_new(9.5) +   theme(legend.position="none")
   p 
   
@@ -677,7 +678,7 @@ ggsave(file.path(write_output_path, "q11_color.pdf"), p,  width=5.5, height=3)
 
 
 ###########################################################################
-###  Plot Replicability Failure Cause (Q13)
+###  Plot Reproducibility Failure Cause (Q13)
 ###########################################################################
 #sSor for plotting
 plot_q13 <- q13_journal_perc%>%
@@ -700,7 +701,7 @@ p <- ggplot(plot_q13, aes(x=failure, y=value))
 p <- p + geom_bar(stat = 'identity')#, width=0.8, position = position_dodge(width=0.8))
 p <- p + scale_y_continuous(name="Number of Articles", breaks=seq(0,20,2), expand = c(0, 0))
 p <- p + coord_cartesian(ylim = c(0, 11))
-p <- p + scale_x_discrete(name="Why Did Replication Fail (Q13)", limits=c("Availability\nFail", "Unclear directions", "Did not generate results", "Hardware/software error", "Results differed", "Other"), labels=c("Availability\nFail", "Unclear\ndirections", "Did not\ngenerate results", "Hardware/software\nerror", "Results\ndiffered", "Other"))
+p <- p + scale_x_discrete(name="Why Did Reproducibility Fail (Q13)", limits=c("Availability\nFail", "Unclear directions", "Did not generate results", "Hardware/software error", "Results differed", "Other"), labels=c("Availability\nFail", "Unclear\ndirections", "Did not\ngenerate results", "Hardware/software\nerror", "Results\ndiffered", "Other"))
 #p <- p + scale_fill_manual(name="Journal", values=journal_colors) 
 p <- p + theme_classic_new(9.5) +   theme(legend.position="bottom") + guides(fill = guide_legend(nrow = 1))
 p 	
@@ -711,7 +712,7 @@ ggsave(file.path(write_output_path, "q13_bw.svg"), p,  width=5.5, height=3)
 ggsave(file.path(write_output_path, "q13_bw.pdf"), p,  width=5.5, height=3)
 
 
-### Output replicability paper details
+### Output reproducibility paper details
 reproduc_df %>%
 	filter(rep_avail == "repro") %>%
 	filter(Q11 != "Availability\nFail") %>%
@@ -750,7 +751,7 @@ p <- p + geom_boxplot(fill="grey")
 p <- p + stat_summary(fun.y=mean, colour="#e41a1c", geom="point", shape=18, size=3,show_guide = FALSE)
 p <- p + coord_flip(ylim=c(0,121))
 p <- p + theme_classic_new(9.5)
-p <- p + scale_x_discrete(name="Survey Ending Question", breaks=c( "Reproducibility", "Availability", "Paper Type"), labels=c( "Replicability of\nResults\n(Q13)", "Availability of\nArtifacts\n(Q9)", "No Artifacts\nAvailable\n(Q5)"))
+p <- p + scale_x_discrete(name="Survey Ending Question", breaks=c( "Reproducibility", "Availability", "Paper Type"), labels=c( "Reproducibility of\nResults\n(Q13)", "Availability of\nArtifacts\n(Q9)", "No Artifacts\nAvailable\n(Q5)"))
 p <- p + scale_y_continuous(name="Time Spent (Minutes)", breaks=seq(0,500,15))
 p
 
@@ -767,7 +768,7 @@ p <- p + geom_jitter(height = 0, width = 0.07, colour="black", alpha=0.3, size=0
 p <- p + stat_summary(fun.y=mean, colour="#e41a1c", geom="point", shape=18, size=3,show_guide = FALSE)
 p <- p + coord_flip()
 p <- p + theme_classic_new(9.5)
-p <- p + scale_x_discrete(name="Survey Ending Question", breaks=c( "Reproducibility", "Availability", "Paper Type"), labels=c( "Replicability of\nResults\n(Q13)", "Availability of\nArtifacts\n(Q9)", "No Artifacts\nAvailable\n(Q5)"))
+p <- p + scale_x_discrete(name="Survey Ending Question", breaks=c( "Reproducibility", "Availability", "Paper Type"), labels=c( "Reproducibility of\nResults\n(Q13)", "Availability of\nArtifacts\n(Q9)", "No Artifacts\nAvailable\n(Q5)"))
 p <- p + scale_y_continuous(name="Time Spent (Minutes)", breaks=seq(0,500,15))
 p
 ### Save figure
@@ -800,7 +801,7 @@ p <- ggplot(reproduc_df, aes(x=Q12, y=stopping_point))
 p <- p + geom_density_ridges( size=0.2, bandwidth=10)
 p <- p + theme_classic_new(9.5)
 p <- p + scale_x_continuous(name="Time Spent (Minutes)", breaks=seq(0,500,15), expand = c(0, 0))
-p <- p + scale_y_discrete(name="Survey Ending Question", breaks=c( "Reproducibility", "Availability", "Paper Type"), labels=c( "Replicability of\nResults\n(Q13)", "Availability of\nArtifacts\n(Q9)", "No Artifacts\nAvailable\n(Q5)"))
+p <- p + scale_y_discrete(name="Survey Ending Question", breaks=c( "Reproducibility", "Availability", "Paper Type"), labels=c( "Reproducibility of\nResults\n(Q13)", "Availability of\nArtifacts\n(Q9)", "No Artifacts\nAvailable\n(Q5)"))
 p 
 ### Save figure
 ggsave(file.path(write_output_path, "q12_ridge.png"), p,  width=4.5, height=3, dpi=600)
@@ -815,7 +816,7 @@ p <- p + geom_boxplot()
 p <- p + scale_fill_manual(name="Journal", values=journal_colors) 
 p <- p + coord_flip()
 p <- p + theme_classic_new(9.5)
-p <- p + scale_x_discrete(name="Survey Ending Question", breaks=c( "Reproducibility", "Availability", "Paper Type"), labels=c( "Replicability of\nResults\n(Q13)", "Availability of\nArtifacts\n(Q9)", "No Artifacts\nAvailable\n(Q5)"))
+p <- p + scale_x_discrete(name="Survey Ending Question", breaks=c( "Reproducibility", "Availability", "Paper Type"), labels=c( "Reproducibility of\nResults\n(Q13)", "Availability of\nArtifacts\n(Q9)", "No Artifacts\nAvailable\n(Q5)"))
 p <- p + scale_y_continuous(name="Time Spent (Minutes)", breaks=seq(0,500,15))
 p
 #
@@ -978,7 +979,7 @@ paper_edges_level5 <- q11_freq %>%
 	dplyr::select(N1, N2, Value)
 
 ### Calculate nodes 
-q11_labels <- c("Availability\nfailure [10]", "Not replicable\n[4]", "Some replicable\n[4]", "Fully replicable\n[2]")
+q11_labels <- c("Availability\nfailure [10]", "Not reproducible\n[4]", "Some reproducible\n[4]", "Fully reproducible\n[2]")
 
 ### Calculate nodes 
 paper_nodes_level5 <- data.frame(ID=c("Q11_1", "Q11_2", "Q11_3", "Q11_4"), x=c(5, 5, 5, 5), y=c(200,300,475,579), labels=q11_labels)
