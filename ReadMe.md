@@ -75,7 +75,7 @@ The final code file creates a estimate for all articles published in these journ
 ```
 Rscript 04_pop_estimate.R
 ```
-**Results**     
+## Results       
 After you run the scripts above, look into a new generated folder called "Output". Then open the sub-folder inside it called "publication_figures which will contain the figures 2,3,4, and 6 as reported in the paper.   
 
 
@@ -89,9 +89,9 @@ Please note, this publication is currently under review and is presented here on
 
 For any description of this methodology, please use the following citation (s):
 
-* Stagge, J.H., Rosenberg, D.E., Abdallah, A.M., Akbar, A., Attallah, N., and James, R. (In review) "A novel replicability survey tool to measure and promote reproducibility in hydrology." Scientific Data. [In review, preprint](https://github.com/jstagge/reproduc_hyd/blob/master/assets/stagge_et_al_reproducibility_preprint.pdf)
+* Stagge, J.H., Rosenberg, D.E., Abdallah, A.M., Akbar, A., Attallah, N., and James, R. (In review) "A survey tool to assess and improve data availability and research reproducibility." Scientific Data. [In review, preprint](https://github.com/jstagge/reproduc_hyd/blob/master/assets/stagge_et_al_reproducibility_preprint.pdf)
 
-* Stagge, J.H., Abdallah, A.M., and Rosenberg, D.E. (2018) "jstagge/reproduc_hyd: Source code accompanying "A novel replicability survey tool to measure and promote reproducibility in hydrology" doi: 10.5281/zenodo.1467417
+* Stagge, J.H., Abdallah, A.M., and Rosenberg, D.E. (2018) "jstagge/reproduc_hyd: Source code accompanying "A survey tool to assess and improve data availability and research reproducibility" doi: 10.5281/zenodo.1467417
 
 
 ## Authors
