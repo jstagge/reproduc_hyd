@@ -3,7 +3,7 @@
 If you're interested in improving the survey, we recommend you contact the authors to get the original copies but here are the files you need. 
 
 <div style="text-align:center">
-<img src="https://github.com/jstagge/reproduc_hyd/blob/master/assets/Reproducibility_FlowChart.png" alt="Reproducibility survey flow chart" height="600">
+<img src="https://github.com/jstagge/reproduc_hyd/blob/master/assets/Reproducibility_FlowChart.png" alt="Reproducibility survey flow chart" height="1000">
 </div>
 
 
