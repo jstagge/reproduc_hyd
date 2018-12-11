@@ -9,7 +9,7 @@ The survey flowchart, the online live survey, and the survey form are availabe [
 
 ## Getting Started
 
-Choose an option:
+*Choose an option*:
 
 ### Option 1: Run code live in the cloud with no prerequisites
 
