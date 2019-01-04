@@ -510,7 +510,7 @@ plot_Q5_6$Q5_6 <- factor(plot_Q5_6$Q5_6, levels= c("Dataless or review","No avai
   p <- ggplot(data = plot_Q5_6, aes(x = Q2_abbrev, y = prop_by_journal, fill = Q5_6)) 
   p <- p + geom_bar(stat = 'identity', position = 'stack', width=0.7)
   p <- p + scale_y_continuous(name="Proportion of Articles", labels = scales::percent, expand = c(0, 0), limits = c(0, 1))
-  p <- p + scale_x_discrete(name="Journal")
+  p <- p + scale_x_discrete(name="Journal", breaks=c("EM&S", "HESS", "WRR", "JoH", "JAWRA", "JWRP&M"), labels=c("EM&S\n\nEnvironmental\nModelling\n& Software", "HESS\n\nHydrology and \nEarth System\nSciences", "WRR\n\nWater\nResources\nResearch", "JoH\n\nJournal of\nHydrology", "JAWRA\n\nJournal of\nthe American\nWater Resources\nAssociation", "JWRP&M\n\nJournal of\nWater Resources\nPlanning and\nManagement"))
   #p <- p + scale_fill_manual(name="Availability claim", values=rev(cb_pal("ptol", n=6, sort=FALSE)[c(3, 6, 1, 2, 5, 4)]))#, limits=levels(avail_journal$Q5_leading)) 
   p <- p + scale_fill_manual(name="Stated Availability", values=rev(cb_pal("nature", n=6, sort=FALSE)[c(3, 2, 4, 5, 6, 1)]))
   p <- p + theme_classic_new(9.5) +   theme(legend.position="bottom")
@@ -518,17 +518,17 @@ plot_Q5_6$Q5_6 <- factor(plot_Q5_6$Q5_6, levels= c("Dataless or review","No avai
   p 
   
 ### Save figure
-ggsave(file.path(write_output_path, "q5_q6_combined_byavail_stacked.png"), p,  width=5.5, height=4, dpi=600)
-ggsave(file.path(write_output_path, "q5_q6_combined_byavail_stacked.svg"), p,  width=5.5, height=4)
-ggsave(file.path(write_output_path, "q5_q6_combined_byavail_stacked.pdf"), p,  width=5.5, height=4)
+ggsave(file.path(write_output_path, "q5_q6_combined_byavail_stacked.png"), p,  width=5.5, height=4.75, dpi=600)
+ggsave(file.path(write_output_path, "q5_q6_combined_byavail_stacked.svg"), p,  width=5.5, height=4.75)
+ggsave(file.path(write_output_path, "q5_q6_combined_byavail_stacked.pdf"), p,  width=5.5, height=4.75)
 
 
 ###########################################################################
 ###  Save Figure 3 from Publication
 ###########################################################################
-ggsave(file.path(write_pub_path, "Fig_3.png"), p,  width=5.5, height=4, dpi=600)
-ggsave(file.path(write_pub_path, "Fig_3.svg"), p,  width=5.5, height=4)
-ggsave(file.path(write_pub_path, "Fig_3.pdf"), p,  width=5.5, height=4)
+ggsave(file.path(write_pub_path, "Fig_3.png"), p,  width=5.5, height=4.75, dpi=600)
+ggsave(file.path(write_pub_path, "Fig_3.svg"), p,  width=5.5, height=4.75)
+ggsave(file.path(write_pub_path, "Fig_3.pdf"), p,  width=5.5, height=4.75)
 
 
 

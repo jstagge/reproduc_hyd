@@ -278,7 +278,7 @@ paper_summary_all_sims <- paper_all_sims%>%
 
 
 ### Generate the final figures
-plot_labels <- c("Dataless or\nReview", "Author or Third Party\nRequest Only", "No Availability", "Some Availability", "Available, but\nNot Replicable", "Some or All\nReplicable")
+plot_labels <- c("Dataless or\nReview", "Author or Third Party\nRequest Only", "No Availability", "Some Availability", "Available, But\nNot Reproducible", "Some or All\nReproducible")
 
 p <- ggplot(paper_summary_all_sims, aes(x = final_determ, group=Q2_abbrev, colour=Q2_abbrev)) %>%
 	+ geom_pointrange(aes(y=median, ymin = ll, ymax = ul), position = position_dodge(width = 0.5), size=.75) %>%
