@@ -2,7 +2,7 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1467417.svg)](https://doi.org/10.5281/zenodo.1467417)
 
-This repository contains code associated with paper, entitled, 'A novel replicability survey tool to measure and promote reproducibility in hydrology'. When run, it will replicate the results published in Stagge et al. (2018, [in review, preprint](https://github.com/jstagge/reproduc_hyd/blob/master/assets/stagge_et_al_reproducibility_preprint.pdf)). It is provided here for transparency and so that other users may benefit from its underlying code. Please cite both the paper and this repository if you make use of any part of this.
+This repository contains code associated with paper, entitled, 'A survey tool to assess and improve data availability and research reproducibility'. When run, it will replicate the results published in Stagge et al. (2018, [in review, preprint](https://github.com/jstagge/reproduc_hyd/blob/master/assets/stagge_et_al_reproducibility_preprint.pdf)). It is provided here for transparency and so that other users may benefit from its underlying code. Please cite both the paper and this repository if you make use of any part of this.
 
 ## Access or edit the survey tool  
 The survey flowchart, the online live survey, and the survey form are availabe [here](https://github.com/jstagge/reproduc_hyd/blob/master/assets/Survey_files.md)   
