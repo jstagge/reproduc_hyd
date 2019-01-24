@@ -1,17 +1,21 @@
 ## Google Survey
 
-If you're interested in improving the survey, we recommend you contact the authors to get the original copies but here are the files you need. 
+If you are interested in improving the survey, we recommend you contact the authors to get the original copies but here are the files you need. 
 
 <div style="text-align:center">
-<img src="https://github.com/jstagge/reproduc_hyd/blob/master/assets/Reproducibility_FlowChart.png" alt="Reproducibility survey flow chart" height="1000">
+<img src="https://github.com/jstagge/reproduc_hyd/blob/master/assets/survey/Reproducibility_FlowChart.png" alt="Reproducibility survey flow chart" height="1000">
 </div>
 
 
 ### Use the Google Survey    
-Feel free to share the survey using this public link https://goo.gl/LPCTEz   
+Feel free to share the survey using this public link https://goo.gl/LPCTEz 
+
+We have provided a capture of the Google survey as part of this repository under the assets folder: [Link](https://github.com/jstagge/reproduc_hyd/blob/master/assets/survey/reproducibility_survey.pdf)
 
 ### Edit the survey and improve it   
 You can access a public survey form at this link https://goo.gl/GXMq5T. Please make a copy of the form to your own Google Drive account and then edit it. Leave this public form as-is to match the original one.    
+
+For the underlying html and javascript code, see the assets folder: [Link](https://github.com/jstagge/reproduc_hyd/blob/master/assets/survey/)
 
 ### Edit the survey logic flowchart file
 You can access a public flowchart survey logic at this link https://goo.gl/UzTzyP. Please make a copy of the file to your own Google Drive account and then edit it. Leave this public file as-is to match the original one. Credit to [Draw.io App](https://www.draw.io/).     
