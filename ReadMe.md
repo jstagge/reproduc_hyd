@@ -1,6 +1,6 @@
 # Reproducibility in Hydrology
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.2538160.svg)](https://doi.org/10.5281/zenodo.2538160)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.2562268.svg)](https://doi.org/10.5281/zenodo.2562268)
 
 This repository contains code associated with paper, entitled, 'Assessing data availability and research reproducibility in hydrology and water resources'. When run, it will replicate the results published in [Stagge et al. (2019)](https://doi.org/10.1038/sdata.2019.30). Please cite both the paper and this repository if you make use of any part of this.
 
@@ -91,7 +91,7 @@ For any description of this methodology, please use the following citation (s):
 
 * Stagge, J.H., Rosenberg, D.E., Abdallah, A.M., Akbar, A., Attallah, N., and James, R. (2019) "Assessing data availability and research reproducibility in hydrology and water resources." Scientific Data. 6:190030 [DOI:10.1038/sdata.2019.30](https://doi.org/10.1038/sdata.2019.30)
 
-* Stagge, J.H., Abdallah, A.M., and Rosenberg, D.E. (2019) "jstagge/reproduc_hyd: Source code accompanying "Assessing data availability and research reproducibility in hydrology and water resources Version 2.0" doi: 10.5281/zenodo.2538160
+* Stagge, J.H., Abdallah, A.M., and Rosenberg, D.E. (2019) "jstagge/reproduc_hyd: Source code accompanying "Assessing data availability and research reproducibility in hydrology and water resources Version 2.0" doi: 10.5281/zenodo.2562268
 
 
 ## Authors
