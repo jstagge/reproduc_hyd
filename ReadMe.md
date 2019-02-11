@@ -2,7 +2,7 @@
 
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1467417.svg)](https://doi.org/10.5281/zenodo.1467417)
 
-This repository contains code associated with paper, entitled, 'Assessing data availability and research reproducibility in hydrology and water resources'. When run, it will replicate the results published in Stagge et al. (2019, [accepted, preprint](https://github.com/jstagge/reproduc_hyd/blob/master/assets/stagge_et_al_reproducibility_preprint.pdf)). It is provided here for transparency and so that other users may benefit from its underlying code. Please cite both the paper and this repository if you make use of any part of this.
+This repository contains code associated with paper, entitled, 'Assessing data availability and research reproducibility in hydrology and water resources'. When run, it will replicate the results published in [Stagge et al. (2019)](https://doi.org/10.1038/sdata.2019.30). Please cite both the paper and this repository if you make use of any part of this.
 
 ## Access or edit the survey tool  
 The survey flowchart, the online live survey, and the survey form are available [here](https://github.com/jstagge/reproduc_hyd/blob/master/assets/ReadMe.md)   
@@ -81,18 +81,15 @@ After you run the scripts above, look into a new generated folder called "Output
 
 ## Preprint
 
-[Preprint manuscript file](https://github.com/jstagge/reproduc_hyd/blob/master/assets/stagge_et_al_reproducibility_preprint.pdf) with all text, figures, tables, etc. submitted to Scientific Data.
-
-Please note, this publication is currently under review and is presented here only as reference for the code repository. As per the policies of Scientific Data, this work is subject to press embargo until published.
-
 [AGU 2018 Poster](https://github.com/jstagge/reproduc_hyd/blob/master/assets/AGU/stagge_reproducibility_agu_2018.pdf) as presented at the 2018 Fall Meeting C13J Reproduciblt Science in Water Resources: Cryosphere and Hydrology poster session.
 
+[Preprint manuscript file](https://github.com/jstagge/reproduc_hyd/blob/master/assets/stagge_et_al_reproducibility_preprint.pdf) with all text, figures, tables, etc. submitted to Scientific Data. It is provided here for transparency and so that other users may benefit from its underlying code.
 
 ## Reference and How to Cite
 
 For any description of this methodology, please use the following citation (s):
 
-* Stagge, J.H., Rosenberg, D.E., Abdallah, A.M., Akbar, A., Attallah, N., and James, R. (2019) "Assessing data availability and research reproducibility in hydrology and water resources." Scientific Data. [In review, preprint](https://github.com/jstagge/reproduc_hyd/blob/master/assets/stagge_et_al_reproducibility_preprint.pdf)
+* Stagge, J.H., Rosenberg, D.E., Abdallah, A.M., Akbar, A., Attallah, N., and James, R. (2019) "Assessing data availability and research reproducibility in hydrology and water resources." Scientific Data. 6:190030 [DOI:10.1038/sdata.2019.30](https://doi.org/10.1038/sdata.2019.30)
 
 * Stagge, J.H., Abdallah, A.M., and Rosenberg, D.E. (2018) "jstagge/reproduc_hyd: Source code accompanying "Assessing data availability and research reproducibility in hydrology and water resources" doi: 10.5281/zenodo.1467417
 
