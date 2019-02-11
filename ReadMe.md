@@ -85,6 +85,9 @@ After you run the scripts above, look into a new generated folder called "Output
 
 Please note, this publication is currently under review and is presented here only as reference for the code repository. As per the policies of Scientific Data, this work is subject to press embargo until published.
 
+[AGU 2018 Poster](https://github.com/jstagge/reproduc_hyd/blob/master/assets/AGU/stagge_reproducibility_agu_2018.pdf) as presented at the 2018 Fall Meeting C13J Reproduciblt Science in Water Resources: Cryosphere and Hydrology poster session.
+
+
 ## Reference and How to Cite
 
 For any description of this methodology, please use the following citation (s):
