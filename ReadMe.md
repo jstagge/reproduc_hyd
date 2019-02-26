@@ -81,7 +81,7 @@ After you run the scripts above, look into a new generated folder called "Output
 
 ## Preprint
 
-[AGU 2018 Poster](https://github.com/jstagge/reproduc_hyd/blob/master/assets/AGU/stagge_reproducibility_agu_2018.pdf) as presented at the 2018 Fall Meeting C13J Reproduciblt Science in Water Resources: Cryosphere and Hydrology poster session.
+[AGU 2018 Poster](https://doi.org/10.1002/essoar.10500818.1) as presented at the [2018 Fall Meeting C13J](http://adsabs.harvard.edu/abs/2018AGUFM.C13J1253S) Reproducible Science in Water Resources: Cryosphere and Hydrology poster session.
 
 [Preprint manuscript file](https://github.com/jstagge/reproduc_hyd/blob/master/assets/stagge_et_al_reproducibility_preprint.pdf) with all text, figures, tables, etc. submitted to Scientific Data. It is provided here for transparency and so that other users may benefit from its underlying code.
 
